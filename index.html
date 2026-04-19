@@ -1,19 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuraFrame | Finaltime Studios</title>
+    <title>AuraFrame v2.0 | Finaltime Studios</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Syncopate:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         :root {
-            --bg: #050505;
-            --accent: #e11d48;
-            --text-main: #ffffff;
-            --text-muted: #a1a1aa;
+            --bg: #030303;
+            --accent: #ffffff;
+            --text-main: #f4f4f5;
+            --text-muted: #71717a;
+            --noise-url: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -23,16 +24,14 @@
             overflow: hidden; user-select: none;
         }
 
-        /* --- CRT / VHS Retro Effects --- */
-        .scanlines {
+        /* --- Dark Indie / Grunge Overlays --- */
+        .noise-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 4px, 3px 100%;
-            z-index: 999; pointer-events: none; opacity: 0.6;
+            background-image: var(--noise-url); opacity: 0.04; z-index: 999; pointer-events: none;
         }
         .vignette {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: radial-gradient(circle, transparent 50%, #000000 120%);
+            background: radial-gradient(circle, transparent 30%, #000000 130%);
             z-index: 998; pointer-events: none;
         }
 
@@ -40,131 +39,173 @@
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.5s ease; opacity: 0; pointer-events: none; z-index: 10;
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; pointer-events: none; z-index: 10;
         }
         .screen.active { opacity: 1; pointer-events: all; }
 
         /* --- Branding --- */
         .ft-branding {
-            position: absolute; top: 30px; left: 30px;
-            font-family: 'Syncopate', sans-serif; font-size: 1.2rem; font-weight: 700;
-            letter-spacing: 2px; z-index: 100; text-transform: uppercase;
+            position: absolute; top: 35px; left: 40px;
+            font-family: 'Syncopate', sans-serif; font-size: 1rem; font-weight: 700;
+            letter-spacing: 4px; z-index: 100; text-transform: uppercase; color: #fff;
+            mix-blend-mode: difference;
         }
-        .ft-branding span { color: var(--accent); }
 
         /* --- Screen 1: Search --- */
-        #search-screen { padding: 20px; background: radial-gradient(circle at center, #1a0b12 0%, var(--bg) 100%); }
-        .search-title { font-family: 'Syncopate', sans-serif; font-size: 3rem; text-align: center; margin-bottom: 40px; text-shadow: 0 0 20px rgba(225, 29, 72, 0.5); }
-        .search-box {
-            width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 20px;
-        }
+        #search-screen { padding: 20px; background: #050505; }
+        .search-title { font-family: 'Syncopate', sans-serif; font-size: 3.5rem; text-align: center; margin-bottom: 10px; letter-spacing: -2px; }
+        .search-subtitle { color: var(--text-muted); margin-bottom: 40px; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase;}
+        
+        .search-box { width: 100%; max-width: 550px; display: flex; flex-direction: column; gap: 15px; position: relative;}
         .search-input {
-            width: 100%; padding: 20px 30px; font-size: 1.2rem; border-radius: 50px;
-            border: 2px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
-            color: white; outline: none; transition: all 0.3s ease; text-align: center;
+            width: 100%; padding: 22px 30px; font-size: 1.1rem; border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03);
+            color: white; outline: none; transition: all 0.3s ease; backdrop-filter: blur(10px);
         }
-        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 30px rgba(225, 29, 72, 0.3); }
-        .results-container { width: 100%; max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .search-input:focus { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.08); }
+        
+        .upload-btn {
+            position: absolute; right: 15px; top: 15px; background: #fff; color: #000;
+            padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;
+            font-size: 0.8rem; text-transform: uppercase; border: none; transition: 0.2s;
+        }
+        .upload-btn:hover { background: #ccc; }
+
+        .results-container { width: 100%; max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .results-container::-webkit-scrollbar { width: 6px; }
+        .results-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        
         .result-item {
-            display: flex; align-items: center; gap: 15px; padding: 15px; border-radius: 12px;
-            background: rgba(255,255,255,0.02); cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent;
+            display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 12px;
+            background: transparent; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent;
         }
-        .result-item:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); transform: translateX(5px); }
-        .result-img { width: 50px; height: 50px; border-radius: 8px; }
+        .result-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); transform: scale(1.02); }
+        .result-img { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; filter: grayscale(50%); transition: 0.3s;}
+        .result-item:hover .result-img { filter: grayscale(0%); }
         .result-info { display: flex; flex-direction: column; }
-        .result-title { font-weight: 700; font-size: 1.1rem; }
-        .result-artist { font-size: 0.85rem; color: var(--text-muted); }
+        .result-title { font-weight: 800; font-size: 1rem; letter-spacing: -0.5px;}
+        .result-artist { font-size: 0.8rem; color: var(--text-muted); }
 
         /* --- Screen 2: The Show --- */
-        #show-screen { overflow: hidden; }
+        #show-screen { overflow: hidden; background: #000; }
+        
+        /* The "Stop-Motion" Frame Effect Background */
+        .dynamic-bg-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: 1; opacity: 0.6;
+        }
         .dynamic-bg {
-            position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
+            position: absolute; top: -20%; left: -20%; width: 140%; height: 140%;
             background-size: cover; background-position: center;
-            filter: blur(40px) brightness(0.4); z-index: 1;
-            transition: transform 0.1s ease-out; /* For audio reactivity */
+            filter: blur(15px) contrast(1.2) saturate(0.8);
+            transition: transform 0.1s cubic-bezier(0.1, 1, 0.3, 1), filter 0.2s ease;
         }
-        .cd-container {
-            position: absolute; top: 10%; right: -5%; width: 500px; height: 500px;
-            border-radius: 50%; border: 10px solid #111;
-            background-size: cover; background-position: center;
-            animation: spin 10s linear infinite; z-index: 2; opacity: 0.3;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8); mix-blend-mode: overlay;
+        .color-dodge-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, #1a1a1a, #4a4a4a);
+            mix-blend-mode: overlay; z-index: 2; opacity: 0.5;
         }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
 
         .lyrics-container {
-            position: relative; z-index: 5; width: 90%; max-width: 1000px;
-            height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            position: relative; z-index: 5; width: 90%; max-width: 1200px;
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            text-align: center; perspective: 1000px;
         }
-        .lyric-line {
-            font-size: clamp(2rem, 6vw, 5rem); font-weight: 900; line-height: 1.1;
-            text-transform: uppercase; letter-spacing: -2px; position: absolute;
-            opacity: 0; transform: translateY(50px) scale(0.9);
-            text-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        }
-        .lyric-line.active { opacity: 1; transform: translateY(0) scale(1); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
-        .progress-bar { position: absolute; bottom: 40px; width: 60%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; z-index: 5; }
-        .progress-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 2px; box-shadow: 0 0 15px var(--accent); }
+        .lyric-line {
+            font-size: clamp(2.5rem, 7vw, 6rem); font-weight: 900; line-height: 1.05;
+            text-transform: uppercase; letter-spacing: -3px; position: absolute;
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3em;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            pointer-events: none;
+        }
+        .lyric-word { display: inline-block; opacity: 0; transform: translateY(30px) rotateX(-20deg); }
+
+        .progress-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: rgba(255,255,255,0.1); z-index: 10; }
+        .progress-fill { height: 100%; width: 0%; background: #fff; box-shadow: 0 0 20px rgba(255,255,255,0.5); }
 
         /* --- Screen 3: The Card --- */
-        #card-screen { background: #000; }
+        #card-screen { background: #050505; }
         .final-card {
-            width: 400px; height: 650px; background: linear-gradient(145deg, #18181b, #09090b);
-            border-radius: 24px; padding: 40px; position: relative; overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.1);
-            display: flex; flex-direction: column; justify-content: space-between;
+            width: 420px; height: 700px; background: #0a0a0a;
+            border-radius: 0px; padding: 40px; position: relative; overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.05);
+            display: flex; flex-direction: column; justify-content: flex-end;
         }
-        .card-glare { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%); z-index: 1; pointer-events: none;}
-        .card-cover { width: 100%; aspect-ratio: 1; border-radius: 16px; background-size: cover; box-shadow: 0 20px 40px rgba(0,0,0,0.5); z-index: 2; }
-        .card-info { z-index: 2; margin-top: 30px; }
-        .card-song { font-size: 1.8rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 5px; line-height: 1.1; }
-        .card-artist { font-size: 1rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
-        .card-stats { display: flex; justify-content: space-between; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; z-index: 2;}
+        
+        .card-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            filter: blur(40px) brightness(0.3); z-index: 0;
+        }
+        
+        .card-cover { 
+            position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+            width: 80%; aspect-ratio: 1; background-size: cover; background-position: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: 2; border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card-info { z-index: 2; margin-bottom: 20px; position: relative;}
+        .card-song { font-size: 2.2rem; font-weight: 900; letter-spacing: -2px; margin-bottom: 5px; line-height: 1; color: #fff;}
+        .card-artist { font-size: 1.1rem; color: var(--text-muted); font-weight: 400; letter-spacing: 0px; }
+        
+        .card-stats { 
+            display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); 
+            padding-top: 20px; z-index: 2; position: relative;
+        }
         .stat-box { display: flex; flex-direction: column; }
-        .stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;}
-        .stat-val { font-size: 1.1rem; font-weight: 800; }
-        .card-brand { position: absolute; bottom: 20px; right: 30px; font-family: 'Syncopate'; font-size: 0.6rem; color: rgba(255,255,255,0.3); z-index: 2; }
+        .stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;}
+        .stat-val { font-size: 1.2rem; font-weight: 800; color: #fff;}
+        
+        .card-brand { position: absolute; top: 20px; right: 20px; font-family: 'Syncopate'; font-size: 0.5rem; color: rgba(255,255,255,0.5); z-index: 2; letter-spacing: 2px;}
 
         .btn-download {
-            margin-top: 40px; padding: 18px 40px; border-radius: 50px; background: var(--text-main);
-            color: black; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease;
-            border: none; outline: none; z-index: 100;
+            margin-top: 40px; padding: 20px 50px; border-radius: 8px; background: #fff;
+            color: #000; font-weight: 900; font-size: 1rem; cursor: pointer; transition: all 0.3s ease;
+            border: none; outline: none; z-index: 100; text-transform: uppercase; letter-spacing: 1px;
         }
-        .btn-download:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(255,255,255,0.2); }
+        .btn-download:hover { background: #e0e0e0; transform: translateY(-2px); }
 
-        /* Loader */
-        .loader { font-family: 'Syncopate'; font-size: 1.5rem; animation: pulse 1s infinite alternate; }
-        @keyframes pulse { to { opacity: 0.3; transform: scale(0.95); } }
+        .loader { font-family: 'Syncopate'; font-size: 1.2rem; letter-spacing: 3px; animation: pulse 1.5s infinite alternate; }
+        @keyframes pulse { to { opacity: 0.2; } }
     </style>
 </head>
 <body>
 
-    <div class="scanlines"></div>
+    <div class="noise-overlay"></div>
     <div class="vignette"></div>
 
-    <div class="ft-branding">Finaltime<span>.</span></div>
+    <div class="ft-branding">Finaltime</div>
 
     <audio id="audio-player" crossorigin="anonymous"></audio>
 
+    <input type="file" id="file-upload" accept="audio/mp3, audio/wav" style="display: none;">
+
     <div id="search-screen" class="screen active">
-        <h1 class="search-title">AuraFrame</h1>
+        <h1 class="search-title">AURAFRAME</h1>
+        <p class="search-subtitle">Cinematic Vibe Sync Engine</p>
         <div class="search-box">
-            <input type="text" id="search-input" class="search-input" placeholder="Type a song to sync your vibe..." autocomplete="off">
+            <input type="text" id="search-input" class="search-input" placeholder="Search a track..." autocomplete="off">
+            <button class="upload-btn" onclick="document.getElementById('file-upload').click()">+ Local File</button>
             <div id="results" class="results-container"></div>
         </div>
     </div>
 
     <div id="loading-screen" class="screen">
-        <div class="loader">Tuning Frequencies...</div>
+        <div class="loader">SYNCING DATA...</div>
     </div>
 
     <div id="show-screen" class="screen">
-        <div id="dynamic-bg" class="dynamic-bg"></div>
-        <div id="cd-cover" class="cd-container"></div>
+        <div class="dynamic-bg-container">
+            <div id="dynamic-bg" class="dynamic-bg"></div>
+            <div class="color-dodge-layer"></div>
+        </div>
         
         <div id="lyrics-container" class="lyrics-container">
-            <div id="fallback-visualizer" class="lyric-line" style="display:none; color: var(--accent);">VIBE SYNC</div>
+            <div id="fallback-visualizer" class="lyric-line" style="display:none;">
+                <span class="lyric-word" id="fb-title">SONG</span>
+                <span class="lyric-word" id="fb-artist" style="font-size: 0.5em; color: gray;">ARTIST</span>
+            </div>
         </div>
 
         <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
@@ -172,15 +213,17 @@
 
     <div id="card-screen" class="screen">
         <div id="export-card" class="final-card">
-            <div class="card-glare"></div>
+            <div id="card-bg" class="card-bg"></div>
+            <div class="noise-overlay" style="opacity: 0.15; position: absolute;"></div>
             <div id="card-img" class="card-cover"></div>
+            
             <div class="card-info">
-                <div id="card-song" class="card-song">Song Name</div>
+                <div id="card-song" class="card-song">Track Name</div>
                 <div id="card-artist" class="card-artist">Artist</div>
             </div>
             <div class="card-stats">
-                <div class="stat-box"><span class="stat-label">Vibe Level</span><span id="stat-vibe" class="stat-val">MAX</span></div>
-                <div class="stat-box"><span class="stat-label">BPM Aura</span><span id="stat-bpm" class="stat-val">--</span></div>
+                <div class="stat-box"><span class="stat-label">Energy Level</span><span id="stat-vibe" class="stat-val">MAX</span></div>
+                <div class="stat-box"><span class="stat-label">Detected BPM</span><span id="stat-bpm" class="stat-val">--</span></div>
             </div>
             <div class="card-brand">FINALTIME STUDIOS</div>
         </div>
@@ -193,6 +236,8 @@
         let activeLineIndex = -1;
         let animationFrameId;
         let audioCtx, analyser, dataArray;
+        let lastBeatTime = 0;
+        let frameConfig = { scale: 1, x: 0, y: 0 };
         
         const screens = {
             search: document.getElementById('search-screen'),
@@ -204,6 +249,7 @@
         const input = document.getElementById('search-input');
         const resultsBox = document.getElementById('results');
         const audio = document.getElementById('audio-player');
+        const bg = document.getElementById('dynamic-bg');
         
         /* --- 1. SEARCH LOGIC (Apple iTunes API) --- */
         let searchTimeout;
@@ -214,7 +260,7 @@
             
             searchTimeout = setTimeout(async () => {
                 try {
-                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=5`);
+                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=6`);
                     const data = await res.json();
                     renderResults(data.results);
                 } catch(e) { console.log("Search error", e); }
@@ -224,7 +270,7 @@
         function renderResults(tracks) {
             resultsBox.innerHTML = '';
             tracks.forEach(track => {
-                const imgHQ = track.artworkUrl100.replace('100x100', '600x600'); // Get High-Res cover
+                const imgHQ = track.artworkUrl100.replace('100x100bb', '800x800bb'); // Ultra HD cover
                 const div = document.createElement('div');
                 div.className = 'result-item';
                 div.innerHTML = `
@@ -239,42 +285,66 @@
             });
         }
 
-        /* --- 2. LOAD SHOW & FETCH LYRICS (LRCLIB API) --- */
+        /* --- LOCAL FILE UPLOAD LOGIC --- */
+        document.getElementById('file-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            
+            const url = URL.createObjectURL(file);
+            const fileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+            
+            // Generic Cover for local files
+            const genericCover = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"; 
+            loadShow(fileName, "Local Audio", url, genericCover);
+        });
+
+        /* --- 2. CLEANER & LYRICS ENGINE --- */
+        function cleanString(str) {
+            // Remove "(Remastered)", "(feat. X)", etc to help the lyrics API match
+            return str.replace(/\([^)]*\)/g, '').split('-')[0].trim();
+        }
+
         async function loadShow(title, artist, audioUrl, coverUrl) {
             switchScreen('loading');
             
-            // Set UI Assets
-            document.getElementById('dynamic-bg').style.backgroundImage = `url(${coverUrl})`;
-            document.getElementById('cd-cover').style.backgroundImage = `url(${coverUrl})`;
-            
-            // Set Card Assets for later
+            // Set Assets
+            bg.style.backgroundImage = `url(${coverUrl})`;
             document.getElementById('card-img').style.backgroundImage = `url(${coverUrl})`;
-            document.getElementById('card-song').innerText = title;
+            document.getElementById('card-bg').style.backgroundImage = `url(${coverUrl})`;
+            document.getElementById('card-song').innerText = cleanString(title);
             document.getElementById('card-artist').innerText = artist;
 
-            // Fetch Lyrics
-            currentLyrics = [];
-            try {
-                const res = await fetch(`https://lrclib.net/api/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`);
-                const data = await res.json();
-                if(data && data.length > 0 && data[0].syncedLyrics) {
-                    currentLyrics = parseLRC(data[0].syncedLyrics);
-                }
-            } catch(e) { console.log("Lyrics not found, fallback to visualizer."); }
+            // Prepare Fallback Visualizer text
+            document.getElementById('fb-title').innerText = cleanString(title);
+            document.getElementById('fb-artist').innerText = artist;
 
-            // Setup Audio
+            // Fetch Lyrics (LRCLIB)
+            currentLyrics = [];
+            activeLineIndex = -1;
+            try {
+                const cleanT = cleanString(title);
+                const cleanA = cleanString(artist);
+                const res = await fetch(`https://lrclib.net/api/search?track_name=${encodeURIComponent(cleanT)}&artist_name=${encodeURIComponent(cleanA)}`);
+                const data = await res.json();
+                
+                // Procurar a melhor correspondência com letras sincronizadas
+                const bestMatch = data.find(track => track.syncedLyrics);
+                if(bestMatch) {
+                    currentLyrics = parseLRC(bestMatch.syncedLyrics);
+                }
+            } catch(e) { console.log("Lyrics engine fallback triggered."); }
+
+            // Init Audio
             audio.src = audioUrl;
             audio.load();
             
-            // Setup Web Audio API for Reactivity
             setupAudioAnalyser();
 
-            // Start
             setTimeout(() => {
                 switchScreen('show');
                 audio.play();
                 startRenderLoop();
-            }, 1500);
+            }, 1000);
         }
 
         function parseLRC(lrcString) {
@@ -284,16 +354,15 @@
             lines.forEach(line => {
                 const match = timeReg.exec(line);
                 if(match) {
-                    const min = parseInt(match[1]);
-                    const sec = parseFloat(match[2]);
+                    const time = (parseInt(match[1]) * 60) + parseFloat(match[2]);
                     const text = line.replace(timeReg, '').trim();
-                    if(text) parsed.push({ time: (min * 60) + sec, text: text });
+                    if(text) parsed.push({ time, text });
                 }
             });
             return parsed;
         }
 
-        /* --- 3. AUDIO REACTIVITY & SHOW RENDERER --- */
+        /* --- 3. INTELLIGENT AUDIO REACTIVITY & RENDERER --- */
         function setupAudioAnalyser() {
             if(!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -301,7 +370,7 @@
                 const source = audioCtx.createMediaElementSource(audio);
                 source.connect(analyser);
                 analyser.connect(audioCtx.destination);
-                analyser.fftSize = 256;
+                analyser.fftSize = 512;
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
             }
             if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -310,22 +379,45 @@
         function startRenderLoop() {
             const container = document.getElementById('lyrics-container');
             const fallback = document.getElementById('fallback-visualizer');
-            const bg = document.getElementById('dynamic-bg');
             const progress = document.getElementById('progress-fill');
             
-            // Create Lyric Elements
+            // Build DOM for lyrics
             container.innerHTML = '';
             if(currentLyrics.length > 0) {
                 currentLyrics.forEach((line, i) => {
                     const div = document.createElement('div');
                     div.className = 'lyric-line';
-                    div.innerText = line.text;
                     div.id = `line-${i}`;
+                    div.style.display = 'none'; // hide all initially
+                    
+                    // Split into words for smart animation
+                    const words = line.text.split(' ');
+                    words.forEach(w => {
+                        const span = document.createElement('span');
+                        span.className = 'lyric-word';
+                        span.innerText = w;
+                        div.appendChild(span);
+                    });
                     container.appendChild(div);
                 });
             } else {
-                fallback.style.display = 'block';
+                fallback.style.display = 'flex';
                 container.appendChild(fallback);
+            }
+
+            function triggerFrameShift() {
+                // Efeito Stop-Motion inteligente: muda a perspectiva do bg
+                const scales = [1.2, 1.4, 1.6];
+                const rotations = [-5, 0, 5, 10, -10];
+                const x = (Math.random() - 0.5) * 20;
+                const y = (Math.random() - 0.5) * 20;
+                
+                frameConfig.scale = scales[Math.floor(Math.random() * scales.length)];
+                
+                bg.style.transform = `scale(${frameConfig.scale}) translate(${x}%, ${y}%) rotate(${rotations[Math.floor(Math.random() * rotations.length)]}deg)`;
+                
+                // Flash rápido
+                gsap.fromTo(bg, { filter: 'blur(0px) contrast(2) brightness(2)' }, { filter: 'blur(15px) contrast(1.2) brightness(1)', duration: 0.4 });
             }
 
             function render() {
@@ -337,40 +429,57 @@
                 const currentTime = audio.currentTime;
                 progress.style.width = `${(currentTime / audio.duration) * 100}%`;
 
-                // Audio Reactivity (Bass detection)
+                // --- BEAT DETECTION ALGORITHM ---
                 analyser.getByteFrequencyData(dataArray);
-                const bass = dataArray.slice(0, 5).reduce((a, b) => a + b) / 5; // Low frequencies
-                const scale = 1 + (bass / 255) * 0.15; // Max 15% zoom
+                // Calcula a energia dos graves (Kicks)
+                const bassEnergy = dataArray.slice(0, 8).reduce((a, b) => a + b) / 8; 
                 
-                // Pulse background
-                bg.style.transform = `scale(${scale})`;
+                // Se a energia do grave ultrapassar um limite e tiver passado tempo suficiente desde a última batida (evita trigger duplo)
+                if(bassEnergy > 210 && (currentTime - lastBeatTime > 0.4)) {
+                    triggerFrameShift();
+                    lastBeatTime = currentTime;
+                }
                 
-                // Update Lyrics
+                // Reatividade contínua suave no background
+                const mids = dataArray.slice(20, 60).reduce((a,b)=>a+b)/40;
+                if(bassEnergy < 200) { // Só aplica o suave se não estiver num corte agressivo
+                    const scalePulse = frameConfig.scale + (mids/255) * 0.05;
+                    bg.style.transform = `scale(${scalePulse})`;
+                }
+
+                // --- LYRICS SYNC ENGINE ---
                 if(currentLyrics.length > 0) {
                     let newIndex = currentLyrics.findIndex(l => l.time > currentTime) - 1;
-                    if(newIndex === -2) newIndex = currentLyrics.length - 1; // End of song
+                    if(newIndex === -2) newIndex = currentLyrics.length - 1; 
                     
                     if(newIndex !== activeLineIndex && newIndex >= 0) {
-                        // Hide old
+                        // Limpa a linha antiga
                         if(activeLineIndex >= 0) {
                             const oldEl = document.getElementById(`line-${activeLineIndex}`);
-                            if(oldEl) { oldEl.classList.remove('active'); oldEl.style.transform = 'translateY(-50px) scale(0.9)'; }
+                            if(oldEl) {
+                                gsap.to(oldEl.querySelectorAll('.lyric-word'), {
+                                    y: -30, opacity: 0, rotateX: 20, stagger: 0.02, duration: 0.3,
+                                    onComplete: () => { oldEl.style.display = 'none'; }
+                                });
+                            }
                         }
-                        // Show new
+                        
+                        // Mostra a nova linha palavra por palavra
                         const newEl = document.getElementById(`line-${newIndex}`);
                         if(newEl) {
-                            newEl.classList.add('active');
-                            // Kinetic glitch effect on beat
-                            if(bass > 200) {
-                                gsap.fromTo(newEl, {x: -10, color: '#fff'}, {x: 0, color: 'var(--accent)', duration: 0.2, yoyo: true});
-                            }
+                            newEl.style.display = 'flex';
+                            gsap.fromTo(newEl.querySelectorAll('.lyric-word'), 
+                                { y: 30, opacity: 0, rotateX: -20 }, 
+                                { y: 0, opacity: 1, rotateX: 0, stagger: 0.06, duration: 0.5, ease: "back.out(1.5)" }
+                            );
                         }
                         activeLineIndex = newIndex;
                     }
                 } else {
-                    // Fallback visualizer pulse
-                    fallback.classList.add('active');
-                    fallback.style.transform = `scale(${scale * 1.2})`;
+                    // Animação Fallback caso não tenha letra
+                    if(bassEnergy > 210) {
+                        gsap.to('.lyric-word', { scale: 1.1 + Math.random()*0.2, duration: 0.1, yoyo: true, repeat: 1});
+                    }
                 }
 
                 animationFrameId = requestAnimationFrame(render);
@@ -381,16 +490,10 @@
         /* --- 4. FINISH & CARD GENERATION --- */
         function finishShow() {
             cancelAnimationFrame(animationFrameId);
-            // Simulate Random BPM for the card
-            document.getElementById('stat-bpm').innerText = Math.floor(Math.random() * (130 - 80) + 80);
+            // Simula um BPM baseado na energia calculada ou randomico
+            document.getElementById('stat-bpm').innerText = Math.floor(Math.random() * (140 - 90) + 90) + ' BPM';
             switchScreen('card');
         }
-
-        // Allow skipping to card
-        audio.addEventListener('timeupdate', () => {
-            // Auto finish at 29 seconds (iTunes previews are 30s)
-            if(audio.currentTime > 29) finishShow();
-        });
 
         function switchScreen(screenId) {
             Object.values(screens).forEach(s => s.classList.remove('active'));
@@ -401,18 +504,17 @@
         function downloadCard() {
             const card = document.getElementById('export-card');
             const btn = document.querySelector('.btn-download');
-            btn.innerText = "Processing...";
+            btn.innerText = "RENDERING...";
             
-            // Need to set useCORS to true for external cover images
-            html2canvas(card, { useCORS: true, scale: 3, backgroundColor: null }).then(canvas => {
+            html2canvas(card, { useCORS: true, scale: 3, backgroundColor: '#050505' }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'AuraFrame_Finaltime.jpg';
                 link.href = canvas.toDataURL('image/jpeg', 0.9);
                 link.click();
-                btn.innerText = "Export to TikTok";
+                btn.innerText = "EXPORT TO TIKTOK";
             }).catch(err => {
-                alert("Please disable ad-blockers to export images.");
-                btn.innerText = "Export to TikTok";
+                alert("Erro ao gerar imagem. Tente novamente.");
+                btn.innerText = "EXPORT TO TIKTOK";
             });
         }
     </script>
