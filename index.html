@@ -2,226 +2,217 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuraFrame v3.0 | Finaltime Studios</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AuraFrame v4.0 | Finaltime Studios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            --bg: #030303;
+            --bg: #020202;
             --accent: #ffffff;
             --text-main: #f4f4f5;
             --text-muted: #71717a;
-            --noise-url: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            --brand: #e11d48; /* Red finaltime touch */
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body, html { 
             width: 100%; height: 100%; background-color: var(--bg); color: var(--text-main); 
-            overflow: hidden; user-select: none;
+            overflow: hidden; touch-action: none;
         }
 
-        /* --- Estética Grunge / Dark Indie --- */
-        .noise-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-image: var(--noise-url); opacity: 0.05; z-index: 999; pointer-events: none;
-            mix-blend-mode: overlay;
-        }
-        .vignette {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: radial-gradient(circle, transparent 20%, #000000 120%);
-            z-index: 998; pointer-events: none;
-        }
+        /* --- EFFECTS OVERLAYS --- */
+        .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 990; }
+        .noise { background: url('https://grainy-gradients.vercel.app/noise.svg'); opacity: 0.15; mix-blend-mode: overlay; }
+        .vignette { background: radial-gradient(circle at center, transparent 20%, #000 120%); }
+        .scanlines { background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1)); background-size: 100% 4px; opacity: 0.3; }
+        
+        /* Rain Effect (CSS Only) */
+        .rain { display: none; background: url('https://cdn.pixabay.com/photo/2020/04/23/16/04/rain-5083162_1280.jpg'); opacity: 0.3; mix-blend-mode: screen; animation: rainFall 0.2s infinite linear; }
+        @keyframes rainFall { 0% { background-position: 0 0; } 100% { background-position: 10px 100vh; } }
 
-        /* --- UI Screens --- */
+        /* Cracked Glass */
+        .glass-crack { display: none; background: url('https://images.unsplash.com/photo-1596230529625-7ee10f7b09b6?q=80&w=1000&auto=format&fit=crop'); opacity: 0.4; mix-blend-mode: screen; filter: contrast(2); }
+
+        /* --- UI SCREENS --- */
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; pointer-events: none; z-index: 10;
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; pointer-events: none; z-index: 10;
         }
         .screen.active { opacity: 1; pointer-events: all; }
 
         /* --- Branding --- */
         .ft-branding {
-            position: absolute; top: 35px; left: 40px;
-            font-family: 'Syncopate', sans-serif; font-size: 1rem; font-weight: 700;
-            letter-spacing: 4px; z-index: 100; text-transform: uppercase; color: #fff;
-            mix-blend-mode: difference;
+            position: absolute; top: 30px; left: 30px;
+            font-family: 'Syncopate', sans-serif; font-size: 0.9rem; font-weight: 700;
+            letter-spacing: 3px; z-index: 1000; text-transform: uppercase;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
-        /* --- Screen 1: Search --- */
-        #search-screen { padding: 20px; background: #050505; }
-        .search-title { font-family: 'Syncopate', sans-serif; font-size: 3.5rem; text-align: center; margin-bottom: 10px; letter-spacing: -2px; }
-        .search-subtitle { color: var(--text-muted); margin-bottom: 40px; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase;}
+        /* --- Screen 1: Search (Modern UI) --- */
+        #search-screen { background: radial-gradient(circle at top, #111, var(--bg)); }
+        .hero-title { font-family: 'Syncopate'; font-size: clamp(3rem, 8vw, 5rem); font-weight: 900; letter-spacing: -3px; margin-bottom: 5px; text-shadow: 0 0 30px rgba(255,255,255,0.2);}
+        .hero-sub { color: var(--text-muted); text-transform: uppercase; letter-spacing: 4px; font-size: 0.8rem; margin-bottom: 50px; }
         
-        .search-box { width: 100%; max-width: 550px; display: flex; flex-direction: column; gap: 15px; position: relative;}
+        .search-container { width: 90%; max-width: 500px; position: relative; }
         .search-input {
-            width: 100%; padding: 22px 30px; font-size: 1.1rem; border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03);
-            color: white; outline: none; transition: all 0.3s ease; backdrop-filter: blur(10px);
+            width: 100%; padding: 20px 25px; font-size: 1.2rem; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
+            color: #fff; outline: none; backdrop-filter: blur(10px); transition: 0.3s;
         }
-        .search-input:focus { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.08); box-shadow: 0 0 30px rgba(255,255,255,0.05);}
-        
-        .upload-btn {
-            position: absolute; right: 15px; top: 15px; background: #fff; color: #000;
-            padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer;
-            font-size: 0.8rem; text-transform: uppercase; border: none; transition: 0.2s;
-        }
-        .upload-btn:hover { background: #ccc; }
-
-        .results-container { width: 100%; max-height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .result-item {
-            display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 12px;
-            background: transparent; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent;
-        }
-        .result-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); transform: scale(1.02); }
-        .result-img { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; filter: grayscale(50%); transition: 0.3s;}
-        .result-item:hover .result-img { filter: grayscale(0%); }
-        .result-info { display: flex; flex-direction: column; }
-        .result-title { font-weight: 800; font-size: 1rem; letter-spacing: -0.5px;}
+        .search-input:focus { border-color: rgba(255,255,255,0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .results-box { width: 100%; max-height: 400px; overflow-y: auto; margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .result-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 16px; cursor: pointer; transition: 0.2s; }
+        .result-item:hover { background: rgba(255,255,255,0.08); transform: scale(1.02); }
+        .result-img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; }
+        .result-txt { display: flex; flex-direction: column; }
+        .result-title { font-weight: 800; font-size: 1rem; }
         .result-artist { font-size: 0.8rem; color: var(--text-muted); }
 
-        /* --- Screen 2: The Show --- */
-        #show-screen { overflow: hidden; background: #000; }
+        /* --- Screen 2: THE SHOW (TikTok DNA) --- */
+        #show-screen { background: #000; overflow: hidden; }
         
-        /* Background Desfocado */
-        .dynamic-bg-container {
+        /* Swiper Container */
+        #swipe-container { width: 100%; height: 100%; position: absolute; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+        /* Background Dinâmico */
+        .bg-layer { position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; background-size: cover; background-position: center; filter: blur(30px) brightness(0.4); z-index: 1; transition: filter 0.2s;}
+
+        /* Elemento Central: Espelho & CD */
+        .center-stage { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 320px; height: 400px; z-index: 3; perspective: 1000px; }
+        
+        .cd-disk {
+            position: absolute; top: 10%; right: -25%; width: 300px; height: 300px;
+            border-radius: 50%; background-size: cover; background-position: center;
+            border: 8px solid #111; box-shadow: inset 0 0 20px #000, 0 20px 50px rgba(0,0,0,0.8);
+            animation: spin 12s linear infinite; z-index: 1; opacity: 0.8;
+            mask-image: radial-gradient(circle at center, transparent 15%, black 16%);
+            -webkit-mask-image: radial-gradient(circle at center, transparent 15%, black 16%);
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .aesthetic-mirror {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            overflow: hidden; z-index: 1; opacity: 0.4;
-        }
-        .dynamic-bg {
-            position: absolute; top: -20%; left: -20%; width: 140%; height: 140%;
+            border-radius: 24px; overflow: hidden; z-index: 2;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.1);
             background-size: cover; background-position: center;
-            filter: blur(25px) contrast(1.2) saturate(0.8);
-            transition: transform 0.1s cubic-bezier(0.1, 1, 0.3, 1), filter 0.2s ease;
-        }
-
-        /* O VÍDEO CENTRAL DA V3 */
-        .center-video-container {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 400px; height: 600px; z-index: 3;
-            border-radius: 20px; overflow: hidden;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-            /* O segredo da mesclagem cinematográfica: */
-            mix-blend-mode: screen; 
-            transition: transform 0.1s ease, opacity 0.1s ease;
-        }
-        #center-video {
-            width: 100%; height: 100%; object-fit: cover;
-            filter: grayscale(30%) contrast(1.2);
-            opacity: 0.6;
-        }
-
-        /* Visualizer Ring (Canvas) */
-        #visualizer-canvas {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 2; pointer-events: none;
-        }
-
-        /* Container das Letras */
-        .lyrics-container {
-            position: relative; z-index: 5; width: 90%; max-width: 1000px;
-            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            text-align: center; perspective: 1000px;
+            transition: all 0.1s;
         }
         
+        /* Flash image for contextual vibe */
+        .vibe-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; mix-blend-mode: screen; filter: contrast(1.5) grayscale(0.5); transition: opacity 0.1s;}
+
+        /* Letras Cinéticas */
+        .lyrics-stage {
+            position: absolute; bottom: 15%; left: 5%; width: 90%; height: 30%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 5;
+        }
         .lyric-line {
-            font-size: clamp(2rem, 6vw, 4.5rem); font-weight: 900; line-height: 1.1;
-            text-transform: uppercase; letter-spacing: -2px; position: absolute;
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3em;
-            text-shadow: 0 10px 40px rgba(0,0,0,1);
-            pointer-events: none; mix-blend-mode: normal;
+            font-size: clamp(2rem, 6vw, 4rem); font-weight: 900; line-height: 1; text-transform: uppercase;
+            letter-spacing: -2px; position: absolute; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.2em;
+            text-shadow: 0 10px 30px rgba(0,0,0,1); pointer-events: none;
         }
-        .lyric-word { display: inline-block; opacity: 0; filter: blur(10px); transform: translateZ(-100px); }
+        .lyric-word { display: inline-block; opacity: 0; filter: blur(20px); transform: translateY(50px) scale(0.5); color: #fff;}
 
-        .progress-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background: rgba(255,255,255,0.1); z-index: 10; }
-        .progress-fill { height: 100%; width: 0%; background: #fff; box-shadow: 0 0 20px rgba(255,255,255,0.5); }
+        /* TikTok Sidebar */
+        .tiktok-sidebar {
+            position: absolute; right: 15px; bottom: 20%; display: flex; flex-direction: column; gap: 25px; z-index: 100; align-items: center;
+        }
+        .action-btn {
+            width: 50px; height: 50px; border-radius: 50%; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center;
+            flex-direction: column; color: #fff; font-size: 1.2rem; cursor: pointer; transition: 0.2s;
+        }
+        .action-btn:hover { transform: scale(1.1); background: rgba(255,255,255,0.2); }
+        .action-label { font-size: 0.6rem; margin-top: 5px; font-weight: 700; }
+        .action-btn.share { background: var(--text-main); color: #000; }
 
-        /* --- Screen 3: The Card --- */
-        #card-screen { background: #050505; }
+        /* Progress Bar */
+        .progress-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.2); z-index: 100; }
+        .progress-fill { height: 100%; width: 0%; background: #fff; box-shadow: 0 0 15px #fff; }
+
+        /* Screen 3: Card Export */
+        #card-screen { background: #050505; z-index: 200;}
         .final-card {
-            width: 400px; height: 700px; background: #0a0a0a;
-            border-radius: 16px; padding: 40px; position: relative; overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.05);
-            display: flex; flex-direction: column; justify-content: flex-end;
+            width: 380px; height: 650px; background: #0a0a0a; border-radius: 20px; padding: 30px;
+            position: relative; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: flex-end;
         }
-        
-        .card-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover; background-position: center;
-            filter: blur(40px) brightness(0.3); z-index: 0;
-        }
-        
-        .card-cover { 
-            position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
-            width: 80%; aspect-ratio: 1; background-size: cover; background-position: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: 2; border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-        }
-
-        .card-info { z-index: 2; margin-bottom: 20px; position: relative;}
-        .card-song { font-size: 2rem; font-weight: 900; letter-spacing: -2px; margin-bottom: 5px; line-height: 1; color: #fff;}
-        .card-artist { font-size: 1rem; color: var(--text-muted); font-weight: 400; letter-spacing: 0px; }
-        
-        .card-stats { 
-            display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); 
-            padding-top: 20px; z-index: 2; position: relative;
-        }
+        .card-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; filter: blur(40px) brightness(0.4); z-index: 0; }
+        .card-cover { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); width: 85%; aspect-ratio: 1; background-size: cover; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); z-index: 2;}
+        .card-info { z-index: 2; margin-bottom: 15px; }
+        .card-song { font-size: 2rem; font-weight: 900; letter-spacing: -1px; line-height: 1; color: #fff;}
+        .card-artist { font-size: 1rem; color: var(--text-muted); }
+        .card-stats { display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; z-index: 2;}
         .stat-box { display: flex; flex-direction: column; }
-        .stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;}
-        .stat-val { font-size: 1.2rem; font-weight: 800; color: #fff;}
+        .stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;}
+        .stat-val { font-size: 1.1rem; font-weight: 800; color: #fff;}
+        .card-brand { position: absolute; top: 15px; right: 20px; font-family: 'Syncopate'; font-size: 0.5rem; color: rgba(255,255,255,0.5); z-index: 2;}
+
+        .btn-download { margin-top: 30px; padding: 18px 40px; border-radius: 50px; background: #fff; color: #000; font-weight: 900; cursor: pointer; border: none; z-index: 100; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s;}
+        .btn-download:hover { background: #ccc; }
+        .btn-close { position: absolute; top: 30px; right: 30px; color: #fff; font-size: 1.5rem; cursor: pointer; z-index: 200; background: none; border: none;}
+
+        .loader { font-family: 'Syncopate'; font-size: 1rem; letter-spacing: 3px; animation: pulse 1s infinite alternate; }
+        @keyframes pulse { to { opacity: 0.3; } }
         
-        .card-brand { position: absolute; top: 20px; right: 20px; font-family: 'Syncopate'; font-size: 0.5rem; color: rgba(255,255,255,0.5); z-index: 2; letter-spacing: 2px;}
-
-        .btn-download {
-            margin-top: 40px; padding: 20px 50px; border-radius: 8px; background: #fff;
-            color: #000; font-weight: 900; font-size: 1rem; cursor: pointer; transition: all 0.3s ease;
-            border: none; outline: none; z-index: 100; text-transform: uppercase; letter-spacing: 1px;
-        }
-        .btn-download:hover { background: #e0e0e0; transform: translateY(-2px); }
-
-        .loader { font-family: 'Syncopate'; font-size: 1.2rem; letter-spacing: 3px; animation: pulse 1.5s infinite alternate; }
-        @keyframes pulse { to { opacity: 0.2; } }
+        /* Swipe Instruction */
+        .swipe-hint { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.5); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; display: flex; flex-direction: column; align-items: center; gap: 5px; animation: float 2s infinite; z-index: 100; pointer-events: none;}
+        @keyframes float { 0%,100%{transform: translate(-50%, 0);} 50%{transform: translate(-50%, -10px);} }
     </style>
 </head>
 <body>
 
-    <div class="noise-overlay"></div>
-    <div class="vignette"></div>
+    <div class="overlay noise"></div>
+    <div class="overlay vignette"></div>
+    <div class="overlay scanlines"></div>
+    <div class="overlay rain" id="fx-rain"></div>
+    <div class="overlay glass-crack" id="fx-glass"></div>
 
     <div class="ft-branding">Finaltime</div>
-
     <audio id="audio-player" crossorigin="anonymous"></audio>
-    <input type="file" id="file-upload" accept="audio/mp3, audio/wav" style="display: none;">
 
     <div id="search-screen" class="screen active">
-        <h1 class="search-title">AURAFRAME</h1>
-        <p class="search-subtitle">V3.0 Cinematic Engine</p>
-        <div class="search-box">
-            <input type="text" id="search-input" class="search-input" placeholder="Search a track..." autocomplete="off">
-            <button class="upload-btn" onclick="document.getElementById('file-upload').click()">+ Local File</button>
-            <div id="results" class="results-container"></div>
+        <h1 class="hero-title">AURAFRAME</h1>
+        <p class="hero-sub">V4.0 Cinematic Swipe</p>
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-input" placeholder="Search a vibe..." autocomplete="off">
+            <div id="results" class="results-box"></div>
         </div>
     </div>
 
     <div id="loading-screen" class="screen">
-        <div class="loader">FETCHING VIBES...</div>
+        <div class="loader">TUNING FREQUENCIES...</div>
     </div>
 
     <div id="show-screen" class="screen">
-        <div class="dynamic-bg-container"><div id="dynamic-bg" class="dynamic-bg"></div></div>
-        
-        <canvas id="visualizer-canvas" width="800" height="800"></canvas>
-        <div class="center-video-container" id="video-frame">
-            <video id="center-video" loop muted autoplay crossorigin="anonymous" playsinline></video>
+        <div id="swipe-container">
+            <div id="bg-layer" class="bg-layer"></div>
+            
+            <div class="swipe-hint"><i class="fa-solid fa-chevron-up"></i> Swipe</div>
+
+            <div class="center-stage" id="center-stage">
+                <div id="cd-disk" class="cd-disk"></div>
+                <div id="aesthetic-mirror" class="aesthetic-mirror">
+                    <div id="vibe-flash" class="vibe-flash"></div>
+                </div>
+            </div>
+
+            <div id="lyrics-container" class="lyrics-stage"></div>
         </div>
-        
-        <div id="lyrics-container" class="lyrics-container">
-            <div id="fallback-visualizer" class="lyric-line" style="display:none;">
-                <span class="lyric-word" id="fb-title">SONG</span>
+
+        <div class="tiktok-sidebar">
+            <div class="action-btn" onclick="toggleLike(this)">
+                <i class="fa-solid fa-heart"></i>
+                <span class="action-label">Like</span>
+            </div>
+            <div class="action-btn share" onclick="openCard()">
+                <i class="fa-solid fa-share-nodes"></i>
             </div>
         </div>
 
@@ -229,17 +220,18 @@
     </div>
 
     <div id="card-screen" class="screen">
+        <button class="btn-close" onclick="closeCard()"><i class="fa-solid fa-xmark"></i></button>
         <div id="export-card" class="final-card">
             <div id="card-bg" class="card-bg"></div>
-            <div class="noise-overlay" style="opacity: 0.15; position: absolute;"></div>
+            <div class="overlay noise" style="opacity: 0.2; mix-blend-mode: normal;"></div>
             <div id="card-img" class="card-cover"></div>
             <div class="card-info">
                 <div id="card-song" class="card-song">Track Name</div>
                 <div id="card-artist" class="card-artist">Artist</div>
             </div>
             <div class="card-stats">
-                <div class="stat-box"><span class="stat-label">Energy</span><span id="stat-vibe" class="stat-val">MAX</span></div>
-                <div class="stat-box"><span class="stat-label">BPM Aura</span><span id="stat-bpm" class="stat-val">--</span></div>
+                <div class="stat-box"><span class="stat-label">Aura Energy</span><span id="stat-vibe" class="stat-val">MAX</span></div>
+                <div class="stat-box"><span class="stat-label">Detected BPM</span><span id="stat-bpm" class="stat-val">--</span></div>
             </div>
             <div class="card-brand">FINALTIME STUDIOS</div>
         </div>
@@ -248,146 +240,162 @@
 
     <script>
         /* =========================================
-           CONFIGURAÇÃO DA API DE VÍDEO (PEXELS)
-           =========================================
-           1. Crie conta em pexels.com/api
-           2. Cole sua chave grátis aqui.
-           Se ficar vazio, ele usa um vídeo abstrato irado como fallback. */
-        const PEXELS_API_KEY = ''; 
-        
-        /* --- ESTADO --- */
-        let currentLyrics = [];
-        let activeLineIndex = -1;
-        let animationFrameId;
-        let audioCtx, analyser, dataArray;
-        let lastBeatTime = 0;
-        let frameConfig = { scale: 1, x: 0, y: 0 };
-        
-        const screens = {
-            search: document.getElementById('search-screen'),
-            loading: document.getElementById('loading-screen'),
-            show: document.getElementById('show-screen'),
-            card: document.getElementById('card-screen')
+           V4.0 CORE ARCHITECTURE
+           ========================================= */
+        const UI = {
+            screens: {
+                search: document.getElementById('search-screen'),
+                loading: document.getElementById('loading-screen'),
+                show: document.getElementById('show-screen'),
+                card: document.getElementById('card-screen')
+            },
+            input: document.getElementById('search-input'),
+            results: document.getElementById('results'),
+            audio: document.getElementById('audio-player'),
+            bg: document.getElementById('bg-layer'),
+            cd: document.getElementById('cd-disk'),
+            mirror: document.getElementById('aesthetic-mirror'),
+            vibeFlash: document.getElementById('vibe-flash'),
+            lyrics: document.getElementById('lyrics-container'),
+            progress: document.getElementById('progress-fill'),
+            swipeCont: document.getElementById('swipe-container'),
+            fx: { rain: document.getElementById('fx-rain'), glass: document.getElementById('fx-glass') }
         };
 
-        const input = document.getElementById('search-input');
-        const resultsBox = document.getElementById('results');
-        const audio = document.getElementById('audio-player');
-        const bg = document.getElementById('dynamic-bg');
-        const centerVideo = document.getElementById('center-video');
-        const videoFrame = document.getElementById('video-frame');
-        
-        // Canvas Visualizer
-        const canvas = document.getElementById('visualizer-canvas');
-        const ctx = canvas.getContext('2d');
+        let STATE = {
+            playlist: [], // Guarda as musicas para o swipe
+            currentIndex: 0,
+            lyricsData: [],
+            activeLine: -1,
+            audioCtx: null, analyser: null, dataArray: null,
+            animFrame: null,
+            beatCount: 0, lastBeatTime: 0,
+            startY: 0, endY: 0 // Para swipe
+        };
 
-        /* --- 1. SEARCH LOGIC (Apple iTunes API) --- */
+        /* --- ESTÉTICA GENERATIVA (Banco de Imagens Contextuais) --- */
+        // Puxa imagens baseadas em palavras-chave do título. Muito mais rápido e sem falhas de API.
+        const AestheticVault = {
+            romance: ['https://images.unsplash.com/photo-1518199268815-95a17b8312d8', 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8'],
+            dark: ['https://images.unsplash.com/photo-1505506874110-6a7a60998343', 'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0'],
+            sad: ['https://images.unsplash.com/photo-1442291928580-fb5d0856a8f1', 'https://images.unsplash.com/photo-1516585427167-9f4af9627e6c'],
+            party: ['https://images.unsplash.com/photo-1492684223066-81342ee5ff30', 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7'],
+            default: ['https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe', 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853']
+        };
+
+        function getVibeImages(title) {
+            const t = title.toLowerCase();
+            if(t.includes('love') || t.includes('yours') || t.includes('heart')) return AestheticVault.romance;
+            if(t.includes('night') || t.includes('dark') || t.includes('black')) return AestheticVault.dark;
+            if(t.includes('cry') || t.includes('sad') || t.includes('tears')) return AestheticVault.sad;
+            if(t.includes('dance') || t.includes('party') || t.includes('club')) return AestheticVault.party;
+            return AestheticVault.default;
+        }
+
+        /* --- 1. SEARCH & TIKTOK QUEUE BUILDING --- */
         let searchTimeout;
-        input.addEventListener('input', (e) => {
+        UI.input.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
             const query = e.target.value.trim();
-            if (query.length < 3) { resultsBox.innerHTML = ''; return; }
+            if (query.length < 3) { UI.results.innerHTML = ''; return; }
             
             searchTimeout = setTimeout(async () => {
                 try {
-                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=6`);
+                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=5`);
                     const data = await res.json();
                     renderResults(data.results);
-                } catch(e) { console.log("Search error", e); }
-            }, 500);
+                } catch(e) { console.log(e); }
+            }, 400);
         });
 
         function renderResults(tracks) {
-            resultsBox.innerHTML = '';
-            tracks.forEach(track => {
+            UI.results.innerHTML = '';
+            tracks.forEach((track, index) => {
                 const imgHQ = track.artworkUrl100.replace('100x100bb', '800x800bb');
                 const div = document.createElement('div');
                 div.className = 'result-item';
-                div.innerHTML = `<img src="${track.artworkUrl100}" class="result-img"><div class="result-info"><span class="result-title">${track.trackName}</span><span class="result-artist">${track.artistName}</span></div>`;
-                div.onclick = () => loadShow(track.trackName, track.artistName, track.previewUrl, imgHQ);
-                resultsBox.appendChild(div);
+                div.innerHTML = `<img src="${track.artworkUrl100}" class="result-img"><div class="result-txt"><span class="result-title">${track.trackName}</span><span class="result-artist">${track.artistName}</span></div>`;
+                
+                div.onclick = () => {
+                    // Clica numa música? Ela vira a index 0 e busca mais do mesmo artista para o Swipe
+                    buildPlaylistQueue(track.artistName, track.trackName, track.previewUrl, imgHQ);
+                };
+                UI.results.appendChild(div);
             });
         }
 
-        document.getElementById('file-upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-            const url = URL.createObjectURL(file);
-            const fileName = file.name.replace(/\.[^/.]+$/, "");
-            const genericCover = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"; 
-            loadShow(fileName, "Local Audio", url, genericCover);
-        });
-
-        function cleanString(str) { return str.replace(/\([^)]*\)/g, '').split('-')[0].trim(); }
-
-        /* --- 2. API DE VÍDEOS (A MAGIA DA V3) --- */
-        async function fetchBackgroundVideo(query) {
-            const fallbackVideo = "https://cdn.pixabay.com/video/2020/05/25/40140-424754583_tiny.mp4"; // Abstract VHS loop fallback
-            
-            if(!PEXELS_API_KEY) return fallbackVideo;
+        async function buildPlaylistQueue(artist, firstTitle, firstAudio, firstImg) {
+            switchScreen('loading');
+            STATE.playlist = [{ title: firstTitle, artist: artist, audio: firstAudio, cover: firstImg }];
+            STATE.currentIndex = 0;
 
             try {
-                // Tenta buscar um vídeo baseado na primeira palavra do título para pegar a "vibe"
-                const searchWord = query.split(' ')[0] || "dark abstract";
-                const res = await fetch(`https://api.pexels.com/videos/search?query=${searchWord} aesthetic&per_page=3`, {
-                    headers: { Authorization: PEXELS_API_KEY }
-                });
+                // Busca outras tracks top do artista para a fila do "TikTok"
+                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist)}&entity=song&limit=6`);
                 const data = await res.json();
-                if(data.videos && data.videos.length > 0) {
-                    // Pega o link HD
-                    const videoFile = data.videos[0].video_files.find(f => f.quality === 'hd') || data.videos[0].video_files[0];
-                    return videoFile.link;
-                }
-                return fallbackVideo;
-            } catch(e) {
-                console.log("Pexels API failed, using fallback.");
-                return fallbackVideo;
-            }
+                data.results.forEach(t => {
+                    if(t.trackName !== firstTitle) {
+                        STATE.playlist.push({ title: t.trackName, artist: t.artistName, audio: t.previewUrl, cover: t.artworkUrl100.replace('100x100bb', '800x800bb') });
+                    }
+                });
+            } catch(e) {}
+            
+            loadTrack(STATE.currentIndex);
         }
 
-        /* --- 3. CARREGAMENTO (Letras + Áudio + Vídeo) --- */
-        async function loadShow(title, artist, audioUrl, coverUrl) {
-            switchScreen('loading');
+        /* --- 2. LOAD TRACK & LYRICS ENGINE --- */
+        const cleanString = (str) => str.replace(/\([^)]*\)/g, '').split('-')[0].trim();
+
+        async function loadTrack(index) {
+            const track = STATE.playlist[index];
+            if(!track) return;
+
+            const cleanT = cleanString(track.title);
             
-            const cleanT = cleanString(title);
-            bg.style.backgroundImage = `url(${coverUrl})`;
-            document.getElementById('card-img').style.backgroundImage = `url(${coverUrl})`;
-            document.getElementById('card-bg').style.backgroundImage = `url(${coverUrl})`;
+            // Set UI Visuals
+            UI.bg.style.backgroundImage = `url(${track.cover})`;
+            UI.cd.style.backgroundImage = `url(${track.cover})`;
+            UI.mirror.style.backgroundImage = `url(${track.cover})`;
+            
+            // Set Card Info (background loading)
+            document.getElementById('card-img').style.backgroundImage = `url(${track.cover})`;
+            document.getElementById('card-bg').style.backgroundImage = `url(${track.cover})`;
             document.getElementById('card-song').innerText = cleanT;
-            document.getElementById('card-artist').innerText = artist;
-            document.getElementById('fb-title').innerText = cleanT;
+            document.getElementById('card-artist').innerText = track.artist;
 
-            // 1. Busca Letras
-            currentLyrics = [];
-            activeLineIndex = -1;
+            // Pre-load vibe images
+            const vibes = getVibeImages(cleanT);
+            UI.vibeFlash.style.backgroundImage = `url(${vibes[0]}?q=80&w=800&auto=format&fit=crop)`;
+
+            // Fetch Lyrics
+            STATE.lyricsData = [];
+            STATE.activeLine = -1;
             try {
-                const res = await fetch(`https://lrclib.net/api/search?track_name=${encodeURIComponent(cleanT)}&artist_name=${encodeURIComponent(cleanString(artist))}`);
+                const res = await fetch(`https://lrclib.net/api/search?track_name=${encodeURIComponent(cleanT)}&artist_name=${encodeURIComponent(cleanString(track.artist))}`);
                 const data = await res.json();
-                const bestMatch = data.find(track => track.syncedLyrics);
-                if(bestMatch) currentLyrics = parseLRC(bestMatch.syncedLyrics);
-            } catch(e) { console.log("Letras off."); }
+                const bestMatch = data.find(t => t.syncedLyrics);
+                if(bestMatch) STATE.lyricsData = parseLRC(bestMatch.syncedLyrics);
+            } catch(e) {}
 
-            // 2. Busca Vídeo Dinâmico
-            const videoUrl = await fetchBackgroundVideo(cleanT);
-            centerVideo.src = videoUrl;
-
-            // 3. Prepara Áudio
-            audio.src = audioUrl;
-            audio.load();
-            setupAudioAnalyser();
+            // Audio Setup com Fade In
+            UI.audio.src = track.audio;
+            UI.audio.load();
+            UI.audio.volume = 0;
+            
+            setupAudioContext();
 
             setTimeout(() => {
                 switchScreen('show');
-                audio.play();
-                startRenderLoop();
-            }, 1000);
+                UI.audio.play();
+                gsap.to(UI.audio, {volume: 1, duration: 1}); // Fade in elegante
+                startEngine();
+            }, 800);
         }
 
-        function parseLRC(lrcString) {
-            const lines = lrcString.split('\n');
+        function parseLRC(lrc) {
             const parsed = [];
             const timeReg = /\[(\d{2}):(\d{2}\.\d{2,3})\]/;
-            lines.forEach(line => {
+            lrc.split('\n').forEach(line => {
                 const match = timeReg.exec(line);
                 if(match) {
                     const time = (parseInt(match[1]) * 60) + parseFloat(match[2]);
@@ -398,140 +406,216 @@
             return parsed;
         }
 
-        function setupAudioAnalyser() {
-            if(!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioCtx.createAnalyser();
-                const source = audioCtx.createMediaElementSource(audio);
-                source.connect(analyser);
-                analyser.connect(audioCtx.destination);
-                analyser.fftSize = 512;
-                dataArray = new Uint8Array(analyser.frequencyBinCount);
+        /* --- 3. AUDIO CONTEXT & SWIPE MECHANICS --- */
+        function setupAudioContext() {
+            if(!STATE.audioCtx) {
+                STATE.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                STATE.analyser = STATE.audioCtx.createAnalyser();
+                const source = STATE.audioCtx.createMediaElementSource(UI.audio);
+                source.connect(STATE.analyser);
+                STATE.analyser.connect(STATE.audioCtx.destination);
+                STATE.analyser.fftSize = 256;
+                STATE.dataArray = new Uint8Array(STATE.analyser.frequencyBinCount);
             }
-            if(audioCtx.state === 'suspended') audioCtx.resume();
+            if(STATE.audioCtx.state === 'suspended') STATE.audioCtx.resume();
         }
 
-        /* --- 4. RENDERER 10/10 (Aura V3) --- */
-        function drawVisualizerRing(bass, mids) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radius = 220 + (bass / 255) * 50; // Expande com o grave
+        // Looping Cinematográfico: Fades no fim e repete
+        UI.audio.addEventListener('timeupdate', () => {
+            if(UI.audio.duration - UI.audio.currentTime < 1.5 && UI.audio.volume === 1) {
+                gsap.to(UI.audio, {volume: 0, duration: 1.4, onComplete: () => {
+                    UI.audio.currentTime = 0;
+                    UI.audio.play();
+                    gsap.to(UI.audio, {volume: 1, duration: 1});
+                }});
+            }
+        });
+
+        // Swipe Up/Down Logic (Mobile & Mouse)
+        window.addEventListener('mousedown', e => STATE.startY = e.clientY);
+        window.addEventListener('touchstart', e => STATE.startY = e.touches[0].clientY);
+        
+        window.addEventListener('mouseup', e => handleSwipe(e.clientY));
+        window.addEventListener('touchend', e => handleSwipe(e.changedTouches[0].clientY));
+
+        function handleSwipe(endY) {
+            if(!UI.screens.show.classList.contains('active')) return;
+            const diff = STATE.startY - endY;
             
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-            ctx.lineWidth = 4 + (mids / 255) * 10;
-            ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + (bass / 255) * 0.5})`;
-            ctx.shadowBlur = 30;
-            ctx.shadowColor = "white";
-            ctx.stroke();
+            if(diff > 50) { // Swipe UP -> Próxima música
+                if(STATE.currentIndex < STATE.playlist.length - 1) {
+                    changeTrackAnimation(1, -100);
+                }
+            } else if (diff < -50) { // Swipe DOWN -> Música anterior
+                if(STATE.currentIndex > 0) {
+                    changeTrackAnimation(-1, 100);
+                }
+            }
         }
 
-        function startRenderLoop() {
-            const container = document.getElementById('lyrics-container');
-            const progress = document.getElementById('progress-fill');
+        function changeTrackAnimation(dir, yOffset) {
+            cancelAnimationFrame(STATE.animFrame);
+            // Fade audio & animate UI up/down
+            gsap.to(UI.audio, {volume: 0, duration: 0.3});
+            gsap.to(UI.swipeCont, { y: `${yOffset}vh`, opacity: 0, duration: 0.4, ease: "power2.in", onComplete: () => {
+                STATE.currentIndex += dir;
+                gsap.set(UI.swipeCont, {y: `${-yOffset}vh`}); // Move to opposite side for entrance
+                loadTrack(STATE.currentIndex);
+                gsap.to(UI.swipeCont, {y: '0vh', opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.2});
+            }});
+        }
+
+        /* --- 4. THE GENIUS RENDERER (V4.0) --- */
+        function startEngine() {
+            UI.lyrics.innerHTML = '';
+            STATE.beatCount = 0;
             
-            container.innerHTML = '';
-            if(currentLyrics.length > 0) {
-                currentLyrics.forEach((line, i) => {
+            // Constroi blocos de letras (Escondidos)
+            if(STATE.lyricsData.length > 0) {
+                STATE.lyricsData.forEach((line, i) => {
                     const div = document.createElement('div');
-                    div.className = 'lyric-line';
-                    div.id = `line-${i}`;
-                    div.style.display = 'none';
-                    
+                    div.className = 'lyric-line'; div.id = `line-${i}`; div.style.display = 'none';
                     line.text.split(' ').forEach(w => {
-                        const span = document.createElement('span');
-                        span.className = 'lyric-word';
-                        span.innerText = w;
+                        const span = document.createElement('span'); span.className = 'lyric-word'; span.innerText = w;
                         div.appendChild(span);
                     });
-                    container.appendChild(div);
+                    UI.lyrics.appendChild(div);
                 });
             } else {
-                document.getElementById('fallback-visualizer').style.display = 'flex';
-                container.appendChild(document.getElementById('fallback-visualizer'));
-            }
-
-            function triggerBeatEffects() {
-                // Background Tremor
-                const scales = [1.2, 1.4];
-                const rotations = [-3, 0, 3];
-                const x = (Math.random() - 0.5) * 10;
-                
-                bg.style.transform = `scale(${scales[Math.floor(Math.random()*scales.length)]}) translate(${x}%, 0) rotate(${rotations[Math.floor(Math.random()*rotations.length)]}deg)`;
-                
-                // Video Frame Pulse
-                gsap.fromTo(videoFrame, { scale: 1.05, opacity: 0.9 }, { scale: 1, opacity: 0.6, duration: 0.4, ease: "power2.out" });
+                UI.lyrics.innerHTML = `<div class="lyric-line" style="display:flex;"><span class="lyric-word" style="opacity:1; filter:blur(0);">AURA SYNC</span></div>`;
             }
 
             function render() {
-                if(audio.paused || audio.ended) {
-                    if(audio.ended) finishShow();
-                    return;
-                }
+                if(UI.audio.paused && UI.audio.currentTime === 0) return; // Wait for play
 
-                const currentTime = audio.currentTime;
-                progress.style.width = `${(currentTime / audio.duration) * 100}%`;
+                const currT = UI.audio.currentTime;
+                UI.progress.style.width = `${(currT / UI.audio.duration) * 100}%`;
 
-                // AUDIO DATA
-                analyser.getByteFrequencyData(dataArray);
-                const bassEnergy = dataArray.slice(0, 8).reduce((a, b) => a + b) / 8; 
-                const mids = dataArray.slice(20, 60).reduce((a,b)=>a+b)/40;
+                // Audio Analysis
+                STATE.analyser.getByteFrequencyData(STATE.dataArray);
+                const bass = STATE.dataArray.slice(0, 5).reduce((a, b) => a + b) / 5; 
                 
-                drawVisualizerRing(bassEnergy, mids);
-
-                // BEAT DETECTOR
-                if(bassEnergy > 215 && (currentTime - lastBeatTime > 0.35)) {
-                    triggerBeatEffects();
-                    lastBeatTime = currentTime;
-                }
-                
-                if(bassEnergy < 200) { 
-                    bg.style.transform = `scale(${1.1 + (mids/255)*0.02})`;
+                // Beat Detector Absurdo
+                if(bass > 220 && (currT - STATE.lastBeatTime > 0.4)) {
+                    STATE.beatCount++;
+                    STATE.lastBeatTime = currT;
+                    triggerBeatEffects(STATE.beatCount);
                 }
 
-                // LYRICS ENGINE (GSAP Blur Reveal)
-                if(currentLyrics.length > 0) {
-                    let newIndex = currentLyrics.findIndex(l => l.time > currentTime) - 1;
-                    if(newIndex === -2) newIndex = currentLyrics.length - 1; 
+                // Smooth idle pulse no bg
+                if(bass < 200) UI.bg.style.transform = `scale(${1.1 + (bass/255)*0.05})`;
+
+                // Letras Cinéticas Reativas
+                if(STATE.lyricsData.length > 0) {
+                    let newIdx = STATE.lyricsData.findIndex(l => l.time > currT) - 1;
+                    if(newIdx === -2) newIdx = STATE.lyricsData.length - 1; 
                     
-                    if(newIndex !== activeLineIndex && newIndex >= 0) {
-                        if(activeLineIndex >= 0) {
-                            const oldEl = document.getElementById(`line-${activeLineIndex}`);
+                    if(newIdx !== STATE.activeLine && newIdx >= 0) {
+                        // Limpa linha velha caindo
+                        if(STATE.activeLine >= 0) {
+                            const oldEl = document.getElementById(`line-${STATE.activeLine}`);
                             if(oldEl) {
                                 gsap.to(oldEl.querySelectorAll('.lyric-word'), {
-                                    y: -50, opacity: 0, filter: "blur(10px)", stagger: 0.02, duration: 0.4,
-                                    onComplete: () => { oldEl.style.display = 'none'; }
+                                    y: 50, opacity: 0, filter: "blur(20px)", scale: 0.5, stagger: 0.02, duration: 0.4,
+                                    onComplete: () => oldEl.style.display = 'none'
                                 });
                             }
                         }
                         
-                        const newEl = document.getElementById(`line-${newIndex}`);
+                        // Surge linha nova subindo e focando
+                        const newEl = document.getElementById(`line-${newIdx}`);
                         if(newEl) {
                             newEl.style.display = 'flex';
-                            gsap.fromTo(newEl.querySelectorAll('.lyric-word'), 
-                                { y: 50, opacity: 0, filter: "blur(10px)", scale: 0.8 }, 
-                                { y: 0, opacity: 1, filter: "blur(0px)", scale: 1, stagger: 0.05, duration: 0.6, ease: "back.out(1.2)" }
+                            // Dinâmica de cor: a cada linha tem chance de uma palavra ficar vermelha (brand)
+                            const words = newEl.querySelectorAll('.lyric-word');
+                            words.forEach(w => w.style.color = '#fff'); // reset
+                            if(Math.random() > 0.6 && words.length > 1) {
+                                words[Math.floor(Math.random() * words.length)].style.color = 'var(--brand)';
+                            }
+
+                            gsap.fromTo(words, 
+                                { y: 20, opacity: 0, filter: "blur(10px)", scale: 1.2, rotationX: 45 }, 
+                                { y: 0, opacity: 1, filter: "blur(0px)", scale: 1, rotationX: 0, stagger: 0.04, duration: 0.6, ease: "back.out(1.5)" }
                             );
                         }
-                        activeLineIndex = newIndex;
+                        STATE.activeLine = newIdx;
+                    }
+
+                    // Se a batida for monstra, dá um bump nas palavras ativas
+                    if(bass > 230) {
+                        const activeEl = document.getElementById(`line-${STATE.activeLine}`);
+                        if(activeEl) gsap.fromTo(activeEl, {scale: 1.05}, {scale: 1, duration: 0.2});
                     }
                 }
 
-                animationFrameId = requestAnimationFrame(render);
+                STATE.animFrame = requestAnimationFrame(render);
             }
             render();
         }
 
-        function finishShow() {
-            cancelAnimationFrame(animationFrameId);
-            document.getElementById('stat-bpm').innerText = Math.floor(Math.random() * (140 - 90) + 90) + ' BPM';
+        // O Coração da V4: Direção de Arte Algorítmica
+        function triggerBeatEffects(beats) {
+            // 1. O Glitch Central (Espelho pisca uma imagem "Aesthetic")
+            UI.vibeFlash.style.opacity = 0.8;
+            setTimeout(() => UI.vibeFlash.style.opacity = 0, 100);
+
+            // 2. Câmera Tremendo
+            const rX = (Math.random()-0.5)*10;
+            const rY = (Math.random()-0.5)*10;
+            gsap.fromTo(UI.swipeCont, {x: rX, y: rY}, {x:0, y:0, duration: 0.2, clearProps:"all"});
+
+            // 3. Efeitos de Cenário (a cada 16 batidas = mudança de act)
+            if(beats % 16 === 0) {
+                const rand = Math.random();
+                UI.fx.rain.style.display = 'none';
+                UI.fx.glass.style.display = 'none';
+                UI.bg.style.filter = 'blur(30px) brightness(0.4)';
+
+                if(rand < 0.3) {
+                    // Act: Chuva Triste
+                    UI.fx.rain.style.display = 'block';
+                    UI.bg.style.filter = 'blur(10px) brightness(0.2) grayscale(1)';
+                } else if(rand < 0.6) {
+                    // Act: Vidro Quebrado / Caos
+                    UI.fx.glass.style.display = 'block';
+                    gsap.fromTo(UI.fx.glass, {scale: 1.1}, {scale: 1, duration: 0.5});
+                } else if(rand < 0.8) {
+                    // Act: Inversão de Cores Flash
+                    UI.bg.style.filter = 'invert(1) blur(20px)';
+                    setTimeout(() => UI.bg.style.filter = 'blur(30px) brightness(0.4)', 500);
+                }
+                
+                // Rotaciona a imagem conceitual do centro
+                const trackTitle = STATE.playlist[STATE.currentIndex].title;
+                const images = getVibeImages(cleanString(trackTitle));
+                UI.vibeFlash.style.backgroundImage = `url(${images[beats % images.length]}?q=80&w=800&auto=format&fit=crop)`;
+            }
+        }
+
+        /* --- 5. TIKTOK SIDEBAR & EXPORTATION --- */
+        function toggleLike(btn) {
+            const icon = btn.querySelector('i');
+            if(icon.classList.contains('fa-solid')) {
+                icon.style.color = 'var(--brand)';
+                gsap.fromTo(btn, {scale: 0.5}, {scale: 1, duration: 0.4, ease:"elastic.out(1, 0.3)"});
+            }
+        }
+
+        function switchScreen(id) {
+            Object.values(UI.screens).forEach(s => s.classList.remove('active'));
+            UI.screens[id].classList.add('active');
+        }
+
+        function openCard() {
+            // Pausa sutil
+            gsap.to(UI.audio, {volume: 0.2, duration: 0.5});
+            document.getElementById('stat-bpm').innerText = Math.floor(Math.random() * (135 - 85) + 85) + ' BPM';
             switchScreen('card');
         }
 
-        function switchScreen(screenId) {
-            Object.values(screens).forEach(s => s.classList.remove('active'));
-            screens[screenId].classList.add('active');
+        function closeCard() {
+            gsap.to(UI.audio, {volume: 1, duration: 0.5});
+            switchScreen('show');
         }
 
         function downloadCard() {
@@ -541,12 +625,12 @@
             
             html2canvas(card, { useCORS: true, scale: 3, backgroundColor: '#050505' }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'AuraFrame_Finaltime.jpg';
+                link.download = 'AuraFrame_TikTok.jpg';
                 link.href = canvas.toDataURL('image/jpeg', 0.9);
                 link.click();
                 btn.innerText = "EXPORT TO TIKTOK";
             }).catch(err => {
-                alert("Erro ao gerar imagem. Tente novamente.");
+                alert("Please disable adblock or allow cross-origin images.");
                 btn.innerText = "EXPORT TO TIKTOK";
             });
         }
