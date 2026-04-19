@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraFrame | Finaltime Studios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #050505;
+            --accent: #e11d48;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body, html { 
+            width: 100%; height: 100%; background-color: var(--bg); color: var(--text-main); 
+            overflow: hidden; user-select: none;
+        }
+
+        /* --- CRT / VHS Retro Effects --- */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            z-index: 999; pointer-events: none; opacity: 0.6;
+        }
+        .vignette {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle, transparent 50%, #000000 120%);
+            z-index: 998; pointer-events: none;
+        }
+
+        /* --- UI Screens --- */
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease; opacity: 0; pointer-events: none; z-index: 10;
+        }
+        .screen.active { opacity: 1; pointer-events: all; }
+
+        /* --- Branding --- */
+        .ft-branding {
+            position: absolute; top: 30px; left: 30px;
+            font-family: 'Syncopate', sans-serif; font-size: 1.2rem; font-weight: 700;
+            letter-spacing: 2px; z-index: 100; text-transform: uppercase;
+        }
+        .ft-branding span { color: var(--accent); }
+
+        /* --- Screen 1: Search --- */
+        #search-screen { padding: 20px; background: radial-gradient(circle at center, #1a0b12 0%, var(--bg) 100%); }
+        .search-title { font-family: 'Syncopate', sans-serif; font-size: 3rem; text-align: center; margin-bottom: 40px; text-shadow: 0 0 20px rgba(225, 29, 72, 0.5); }
+        .search-box {
+            width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 20px;
+        }
+        .search-input {
+            width: 100%; padding: 20px 30px; font-size: 1.2rem; border-radius: 50px;
+            border: 2px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
+            color: white; outline: none; transition: all 0.3s ease; text-align: center;
+        }
+        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 30px rgba(225, 29, 72, 0.3); }
+        .results-container { width: 100%; max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .result-item {
+            display: flex; align-items: center; gap: 15px; padding: 15px; border-radius: 12px;
+            background: rgba(255,255,255,0.02); cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent;
+        }
+        .result-item:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); transform: translateX(5px); }
+        .result-img { width: 50px; height: 50px; border-radius: 8px; }
+        .result-info { display: flex; flex-direction: column; }
+        .result-title { font-weight: 700; font-size: 1.1rem; }
+        .result-artist { font-size: 0.85rem; color: var(--text-muted); }
+
+        /* --- Screen 2: The Show --- */
+        #show-screen { overflow: hidden; }
+        .dynamic-bg {
+            position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
+            background-size: cover; background-position: center;
+            filter: blur(40px) brightness(0.4); z-index: 1;
+            transition: transform 0.1s ease-out; /* For audio reactivity */
+        }
+        .cd-container {
+            position: absolute; top: 10%; right: -5%; width: 500px; height: 500px;
+            border-radius: 50%; border: 10px solid #111;
+            background-size: cover; background-position: center;
+            animation: spin 10s linear infinite; z-index: 2; opacity: 0.3;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); mix-blend-mode: overlay;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .lyrics-container {
+            position: relative; z-index: 5; width: 90%; max-width: 1000px;
+            height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        .lyric-line {
+            font-size: clamp(2rem, 6vw, 5rem); font-weight: 900; line-height: 1.1;
+            text-transform: uppercase; letter-spacing: -2px; position: absolute;
+            opacity: 0; transform: translateY(50px) scale(0.9);
+            text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .lyric-line.active { opacity: 1; transform: translateY(0) scale(1); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        .progress-bar { position: absolute; bottom: 40px; width: 60%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; z-index: 5; }
+        .progress-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 2px; box-shadow: 0 0 15px var(--accent); }
+
+        /* --- Screen 3: The Card --- */
+        #card-screen { background: #000; }
+        .final-card {
+            width: 400px; height: 650px; background: linear-gradient(145deg, #18181b, #09090b);
+            border-radius: 24px; padding: 40px; position: relative; overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .card-glare { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%); z-index: 1; pointer-events: none;}
+        .card-cover { width: 100%; aspect-ratio: 1; border-radius: 16px; background-size: cover; box-shadow: 0 20px 40px rgba(0,0,0,0.5); z-index: 2; }
+        .card-info { z-index: 2; margin-top: 30px; }
+        .card-song { font-size: 1.8rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 5px; line-height: 1.1; }
+        .card-artist { font-size: 1rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+        .card-stats { display: flex; justify-content: space-between; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; z-index: 2;}
+        .stat-box { display: flex; flex-direction: column; }
+        .stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;}
+        .stat-val { font-size: 1.1rem; font-weight: 800; }
+        .card-brand { position: absolute; bottom: 20px; right: 30px; font-family: 'Syncopate'; font-size: 0.6rem; color: rgba(255,255,255,0.3); z-index: 2; }
+
+        .btn-download {
+            margin-top: 40px; padding: 18px 40px; border-radius: 50px; background: var(--text-main);
+            color: black; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease;
+            border: none; outline: none; z-index: 100;
+        }
+        .btn-download:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(255,255,255,0.2); }
+
+        /* Loader */
+        .loader { font-family: 'Syncopate'; font-size: 1.5rem; animation: pulse 1s infinite alternate; }
+        @keyframes pulse { to { opacity: 0.3; transform: scale(0.95); } }
+    </style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+
+    <div class="ft-branding">Finaltime<span>.</span></div>
+
+    <audio id="audio-player" crossorigin="anonymous"></audio>
+
+    <div id="search-screen" class="screen active">
+        <h1 class="search-title">AuraFrame</h1>
+        <div class="search-box">
+            <input type="text" id="search-input" class="search-input" placeholder="Type a song to sync your vibe..." autocomplete="off">
+            <div id="results" class="results-container"></div>
+        </div>
+    </div>
+
+    <div id="loading-screen" class="screen">
+        <div class="loader">Tuning Frequencies...</div>
+    </div>
+
+    <div id="show-screen" class="screen">
+        <div id="dynamic-bg" class="dynamic-bg"></div>
+        <div id="cd-cover" class="cd-container"></div>
+        
+        <div id="lyrics-container" class="lyrics-container">
+            <div id="fallback-visualizer" class="lyric-line" style="display:none; color: var(--accent);">VIBE SYNC</div>
+        </div>
+
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+    </div>
+
+    <div id="card-screen" class="screen">
+        <div id="export-card" class="final-card">
+            <div class="card-glare"></div>
+            <div id="card-img" class="card-cover"></div>
+            <div class="card-info">
+                <div id="card-song" class="card-song">Song Name</div>
+                <div id="card-artist" class="card-artist">Artist</div>
+            </div>
+            <div class="card-stats">
+                <div class="stat-box"><span class="stat-label">Vibe Level</span><span id="stat-vibe" class="stat-val">MAX</span></div>
+                <div class="stat-box"><span class="stat-label">BPM Aura</span><span id="stat-bpm" class="stat-val">--</span></div>
+            </div>
+            <div class="card-brand">FINALTIME STUDIOS</div>
+        </div>
+        <button class="btn-download" onclick="downloadCard()">Export to TikTok</button>
+    </div>
+
+    <script>
+        /* --- STATE & ELEMENTS --- */
+        let currentLyrics = [];
+        let activeLineIndex = -1;
+        let animationFrameId;
+        let audioCtx, analyser, dataArray;
+        
+        const screens = {
+            search: document.getElementById('search-screen'),
+            loading: document.getElementById('loading-screen'),
+            show: document.getElementById('show-screen'),
+            card: document.getElementById('card-screen')
+        };
+
+        const input = document.getElementById('search-input');
+        const resultsBox = document.getElementById('results');
+        const audio = document.getElementById('audio-player');
+        
+        /* --- 1. SEARCH LOGIC (Apple iTunes API) --- */
+        let searchTimeout;
+        input.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+            if (query.length < 3) { resultsBox.innerHTML = ''; return; }
+            
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=5`);
+                    const data = await res.json();
+                    renderResults(data.results);
+                } catch(e) { console.log("Search error", e); }
+            }, 500);
+        });
+
+        function renderResults(tracks) {
+            resultsBox.innerHTML = '';
+            tracks.forEach(track => {
+                const imgHQ = track.artworkUrl100.replace('100x100', '600x600'); // Get High-Res cover
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.innerHTML = `
+                    <img src="${track.artworkUrl100}" class="result-img">
+                    <div class="result-info">
+                        <span class="result-title">${track.trackName}</span>
+                        <span class="result-artist">${track.artistName}</span>
+                    </div>
+                `;
+                div.onclick = () => loadShow(track.trackName, track.artistName, track.previewUrl, imgHQ);
+                resultsBox.appendChild(div);
+            });
+        }
+
+        /* --- 2. LOAD SHOW & FETCH LYRICS (LRCLIB API) --- */
+        async function loadShow(title, artist, audioUrl, coverUrl) {
+            switchScreen('loading');
+            
+            // Set UI Assets
+            document.getElementById('dynamic-bg').style.backgroundImage = `url(${coverUrl})`;
+            document.getElementById('cd-cover').style.backgroundImage = `url(${coverUrl})`;
+            
+            // Set Card Assets for later
+            document.getElementById('card-img').style.backgroundImage = `url(${coverUrl})`;
+            document.getElementById('card-song').innerText = title;
+            document.getElementById('card-artist').innerText = artist;
+
+            // Fetch Lyrics
+            currentLyrics = [];
+            try {
+                const res = await fetch(`https://lrclib.net/api/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`);
+                const data = await res.json();
+                if(data && data.length > 0 && data[0].syncedLyrics) {
+                    currentLyrics = parseLRC(data[0].syncedLyrics);
+                }
+            } catch(e) { console.log("Lyrics not found, fallback to visualizer."); }
+
+            // Setup Audio
+            audio.src = audioUrl;
+            audio.load();
+            
+            // Setup Web Audio API for Reactivity
+            setupAudioAnalyser();
+
+            // Start
+            setTimeout(() => {
+                switchScreen('show');
+                audio.play();
+                startRenderLoop();
+            }, 1500);
+        }
+
+        function parseLRC(lrcString) {
+            const lines = lrcString.split('\n');
+            const parsed = [];
+            const timeReg = /\[(\d{2}):(\d{2}\.\d{2,3})\]/;
+            lines.forEach(line => {
+                const match = timeReg.exec(line);
+                if(match) {
+                    const min = parseInt(match[1]);
+                    const sec = parseFloat(match[2]);
+                    const text = line.replace(timeReg, '').trim();
+                    if(text) parsed.push({ time: (min * 60) + sec, text: text });
+                }
+            });
+            return parsed;
+        }
+
+        /* --- 3. AUDIO REACTIVITY & SHOW RENDERER --- */
+        function setupAudioAnalyser() {
+            if(!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                const source = audioCtx.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(audioCtx.destination);
+                analyser.fftSize = 256;
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+            }
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function startRenderLoop() {
+            const container = document.getElementById('lyrics-container');
+            const fallback = document.getElementById('fallback-visualizer');
+            const bg = document.getElementById('dynamic-bg');
+            const progress = document.getElementById('progress-fill');
+            
+            // Create Lyric Elements
+            container.innerHTML = '';
+            if(currentLyrics.length > 0) {
+                currentLyrics.forEach((line, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'lyric-line';
+                    div.innerText = line.text;
+                    div.id = `line-${i}`;
+                    container.appendChild(div);
+                });
+            } else {
+                fallback.style.display = 'block';
+                container.appendChild(fallback);
+            }
+
+            function render() {
+                if(audio.paused || audio.ended) {
+                    if(audio.ended) finishShow();
+                    return;
+                }
+
+                const currentTime = audio.currentTime;
+                progress.style.width = `${(currentTime / audio.duration) * 100}%`;
+
+                // Audio Reactivity (Bass detection)
+                analyser.getByteFrequencyData(dataArray);
+                const bass = dataArray.slice(0, 5).reduce((a, b) => a + b) / 5; // Low frequencies
+                const scale = 1 + (bass / 255) * 0.15; // Max 15% zoom
+                
+                // Pulse background
+                bg.style.transform = `scale(${scale})`;
+                
+                // Update Lyrics
+                if(currentLyrics.length > 0) {
+                    let newIndex = currentLyrics.findIndex(l => l.time > currentTime) - 1;
+                    if(newIndex === -2) newIndex = currentLyrics.length - 1; // End of song
+                    
+                    if(newIndex !== activeLineIndex && newIndex >= 0) {
+                        // Hide old
+                        if(activeLineIndex >= 0) {
+                            const oldEl = document.getElementById(`line-${activeLineIndex}`);
+                            if(oldEl) { oldEl.classList.remove('active'); oldEl.style.transform = 'translateY(-50px) scale(0.9)'; }
+                        }
+                        // Show new
+                        const newEl = document.getElementById(`line-${newIndex}`);
+                        if(newEl) {
+                            newEl.classList.add('active');
+                            // Kinetic glitch effect on beat
+                            if(bass > 200) {
+                                gsap.fromTo(newEl, {x: -10, color: '#fff'}, {x: 0, color: 'var(--accent)', duration: 0.2, yoyo: true});
+                            }
+                        }
+                        activeLineIndex = newIndex;
+                    }
+                } else {
+                    // Fallback visualizer pulse
+                    fallback.classList.add('active');
+                    fallback.style.transform = `scale(${scale * 1.2})`;
+                }
+
+                animationFrameId = requestAnimationFrame(render);
+            }
+            render();
+        }
+
+        /* --- 4. FINISH & CARD GENERATION --- */
+        function finishShow() {
+            cancelAnimationFrame(animationFrameId);
+            // Simulate Random BPM for the card
+            document.getElementById('stat-bpm').innerText = Math.floor(Math.random() * (130 - 80) + 80);
+            switchScreen('card');
+        }
+
+        // Allow skipping to card
+        audio.addEventListener('timeupdate', () => {
+            // Auto finish at 29 seconds (iTunes previews are 30s)
+            if(audio.currentTime > 29) finishShow();
+        });
+
+        function switchScreen(screenId) {
+            Object.values(screens).forEach(s => s.classList.remove('active'));
+            screens[screenId].classList.add('active');
+        }
+
+        /* --- 5. TIKTOK EXPORT (HTML2Canvas) --- */
+        function downloadCard() {
+            const card = document.getElementById('export-card');
+            const btn = document.querySelector('.btn-download');
+            btn.innerText = "Processing...";
+            
+            // Need to set useCORS to true for external cover images
+            html2canvas(card, { useCORS: true, scale: 3, backgroundColor: null }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'AuraFrame_Finaltime.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.click();
+                btn.innerText = "Export to TikTok";
+            }).catch(err => {
+                alert("Please disable ad-blockers to export images.");
+                btn.innerText = "Export to TikTok";
+            });
+        }
+    </script>
+</body>
+</html>
