@@ -3,313 +3,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AuraFrame v6.0 | Immersive Learning</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    <title>AuraLearn v7.0 | Immersive Interactive Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
-            --bg: #030303;
+            --bg: #020202;
             --text-main: #ffffff;
-            --text-muted: #888888;
+            --text-muted: #666666;
             --brand: #e11d48;
             --brand-alt: #0ea5e9;
-            --noise: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)" opacity="0.15"/%3E%3C/svg%3E');
+            --success: #10b981;
+            --noise: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)" opacity="0.15"/%3E%3C/svg%3E');
         }
+
+        /* LITE MODE OVERRIDES PARA MOBILE */
+        body.lite-mode .cinematic-bg { filter: brightness(0.3) saturate(1.1) !important; }
+        body.lite-mode .glass-cover { box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1); }
+        body.lite-mode .lyric-word { filter: none !important; text-shadow: none !important; }
+        body.lite-mode .noise-layer { display: none; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         body, html { width: 100%; height: 100%; background: var(--bg); color: var(--text-main); overflow: hidden; }
 
-        /* --- Overlays Universais --- */
         .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 900; }
-        .noise-layer { background-image: var(--noise); mix-blend-mode: overlay; z-index: 999; opacity: 0.9;}
-        .vignette-layer { background: radial-gradient(circle at center, transparent 20%, #000000 120%); z-index: 998; }
+        .noise-layer { background-image: var(--noise); mix-blend-mode: overlay; z-index: 999; opacity: 0.7;}
+        .vignette-layer { background: radial-gradient(circle at center, transparent 10%, #000000 130%); z-index: 998; }
 
-        .ft-branding { position: absolute; top: 30px; left: 30px; font-family: 'Syncopate'; font-size: 1rem; font-weight: 700; letter-spacing: 3px; z-index: 1000; text-transform: uppercase; text-shadow: 0 4px 20px rgba(0,0,0,0.8); }
+        .header-ui { position: absolute; top: 30px; left: 30px; right: 30px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
+        .ft-branding { font-family: 'Syncopate'; font-size: 1rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 4px 20px rgba(0,0,0,0.8); }
         .ft-branding span { color: var(--brand); }
+        .user-stats { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 20px; backdrop-filter: blur(10px); font-size: 0.8rem; font-weight: 600; display: flex; gap: 10px; align-items: center;}
+        .user-stats i { color: var(--brand-alt); }
 
-        /* --- Telas --- */
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s ease; opacity: 0; pointer-events: none; z-index: 10; }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease; opacity: 0; pointer-events: none; z-index: 10; }
         .screen.active { opacity: 1; pointer-events: all; }
 
-        /* --- 1. SEARCH SCREEN --- */
-        #search-screen { background: radial-gradient(circle at top, #141414, var(--bg)); }
-        .hero-title { font-family: 'Syncopate'; font-size: clamp(2rem, 5vw, 4rem); font-weight: 900; letter-spacing: -2px; margin-bottom: 5px; text-shadow: 0 10px 30px rgba(0,0,0,0.5);}
-        .hero-sub { color: var(--text-muted); text-transform: uppercase; letter-spacing: 5px; font-size: 0.8rem; margin-bottom: 50px; }
+        /* SEARCH SCREEN */
+        #search-screen { background: radial-gradient(circle at top, #111, var(--bg)); }
+        .hero-title { font-family: 'Syncopate'; font-size: clamp(2rem, 6vw, 4.5rem); font-weight: 900; letter-spacing: -3px; margin-bottom: 5px; background: linear-gradient(to right, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
+        .hero-sub { color: var(--brand); text-transform: uppercase; letter-spacing: 4px; font-size: 0.8rem; margin-bottom: 40px; font-weight: 800;}
         
-        .search-container { width: 90%; max-width: 550px; position: relative; }
-        .search-input { width: 100%; padding: 22px 30px; font-size: 1.2rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: #fff; outline: none; backdrop-filter: blur(10px); transition: 0.3s; text-align: center; font-weight: 300;}
-        .search-input:focus { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.08); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .search-container { width: 90%; max-width: 500px; position: relative; }
+        .search-input { width: 100%; padding: 20px 25px; font-size: 1.1rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); color: #fff; outline: none; backdrop-filter: blur(10px); transition: 0.3s; text-align: center;}
+        .search-input:focus { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .results-box { width: 100%; max-height: 350px; overflow-y: auto; margin-top: 15px; display: flex; flex-direction: column; gap: 8px; padding-right: 5px;}
+        .results-box::-webkit-scrollbar { width: 4px; }
+        .results-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
         
-        .results-box { width: 100%; max-height: 400px; overflow-y: auto; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;}
-        .results-box::-webkit-scrollbar { width: 5px; }
-        .results-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 5px; }
-        
-        .result-item { display: flex; align-items: center; gap: 18px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 16px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
-        .result-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); transform: translateY(-2px); }
-        .result-img { width: 55px; height: 55px; border-radius: 12px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5);}
-        .result-title { font-weight: 800; font-size: 1.1rem; }
-        .result-artist { font-size: 0.85rem; color: var(--text-muted); }
+        .result-item { display: flex; align-items: center; gap: 15px; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 12px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .result-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); transform: translateX(5px); }
+        .result-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover;}
+        .result-title { font-weight: 700; font-size: 1rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;}
+        .result-artist { font-size: 0.8rem; color: var(--text-muted); }
 
-        /* --- 2. SHOW SCREEN --- */
+        /* SHOW SCREEN & ENGINE */
         #show-screen { background: #000; perspective: 1000px; overflow: hidden;}
         
-        .cinematic-bg-container { position: absolute; top: -15%; left: -15%; width: 130%; height: 130%; z-index: 1; overflow: hidden; background: #000;}
-        .cinematic-bg { width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(35px) brightness(0.4) saturate(1.2); transition: transform 0.1s ease-out, filter 0.2s; position: absolute; top:0; left:0;}
-        #cinematic-video { width: 100%; height: 100%; object-fit: cover; filter: blur(10px) brightness(0.4) saturate(1.2); opacity: 0; transition: opacity 1s; position: absolute; top:0; left:0;}
+        .cinematic-bg-container { position: absolute; top: -20%; left: -20%; width: 140%; height: 140%; z-index: 1; overflow: hidden; background: #000;}
+        .cinematic-bg { width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(35px) brightness(0.3) saturate(1.3); position: absolute; top:0; left:0; will-change: transform;}
+        .cinematic-bg-overlay { position: absolute; top:0; left:0; width: 100%; height: 100%; mix-blend-mode: color-burn; opacity: 0.5; transition: background-color 0.5s;}
+        #cinematic-video { width: 100%; height: 100%; object-fit: cover; filter: blur(15px) brightness(0.3) saturate(1.2); opacity: 0; transition: opacity 1s; position: absolute; top:0; left:0;}
         
-        #swipe-container { position: absolute; width: 100%; height: 100%; z-index: 5; transform-style: preserve-3d; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);}
+        #swipe-container { position: absolute; width: 100%; height: 100%; z-index: 5; transform-style: preserve-3d; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);}
         
         .artwork-container {
-            width: clamp(250px, 35vw, 350px); aspect-ratio: 1; position: relative;
-            transform-style: preserve-3d; transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); 
-            margin-bottom: 20vh;
+            width: clamp(220px, 35vw, 320px); aspect-ratio: 1; position: relative;
+            transform-style: preserve-3d; transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            margin-bottom: 25vh; will-change: transform;
         }
-        
         .glass-cover {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             border-radius: 20px; background-size: cover; background-position: center;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.2), inset 0 20px 40px rgba(255,255,255,0.1);
-            transform: translateZ(30px);
-        }
-        .cover-shadow {
-            position: absolute; top: 10%; left: 5%; width: 90%; height: 90%;
-            background: #000; filter: blur(30px); opacity: 0.8; transform: translateZ(-20px);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.2);
+            transform: translateZ(20px);
         }
 
-        /* --- LEARNING MODE CLASSES --- */
-        #show-screen.learning-active #swipe-container { justify-content: flex-start; padding-top: 10vh; }
-        #show-screen.learning-active .artwork-container { width: 150px; margin-bottom: 5vh; transform: scale(0.8) translateZ(10px) !important; opacity: 0.5;}
-        #show-screen.learning-active .lyrics-stage { height: 65%; bottom: 5%; align-items: flex-start; text-align: left; padding: 0 10%;}
-        #show-screen.learning-active .lyric-line { font-size: clamp(1.5rem, 4vw, 3rem); justify-content: flex-start; text-align: left;}
+        /* LEARNING MODE & LYRICS SCROLLING */
+        #show-screen.learning-active #swipe-container { justify-content: flex-start; padding-top: 15vh; }
+        #show-screen.learning-active .artwork-container { width: 120px; margin-bottom: 5vh; transform: scale(0.9) translateZ(0) !important; opacity: 0.3;}
+        
+        .lyrics-viewport { position: absolute; bottom: 5%; left: 0; width: 100%; height: 50%; overflow: hidden; display: flex; flex-direction: column; align-items: center; mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent); z-index: 50;}
+        
+        .lyrics-track { width: 90%; max-width: 800px; display: flex; flex-direction: column; align-items: center; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); transform: translateY(50vh); }
+        
+        #show-screen.learning-active .lyrics-track { align-items: flex-start; }
 
-        /* Letras e Traduções */
-        .lyrics-stage {
-            position: absolute; bottom: 8%; left: 0; width: 100%; height: 35%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
-            transform: translateZ(50px); transition: all 0.6s ease;
-        }
-        .lyric-line {
-            font-size: clamp(2rem, 6vw, 4.5rem); font-weight: 900; line-height: 1.1; text-transform: uppercase;
-            letter-spacing: -2px; position: absolute; display: flex; flex-direction: column; align-items: center;
-            text-shadow: 0 15px 40px rgba(0,0,0,1), 0 2px 5px rgba(0,0,0,0.5); pointer-events: none; width: 100%;
-        }
+        .lyric-line { padding: 15px 0; font-size: clamp(1.8rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; text-transform: uppercase; letter-spacing: -1.5px; display: flex; flex-direction: column; align-items: center; text-shadow: 0 10px 30px rgba(0,0,0,0.8); opacity: 0.3; transform: scale(0.9); transition: all 0.4s ease; width: 100%; text-align: center;}
+        
+        #show-screen.learning-active .lyric-line { align-items: flex-start; text-align: left; font-size: clamp(1.5rem, 4vw, 2.5rem); }
+
+        .lyric-line.active { opacity: 1; transform: scale(1); filter: none;}
         .lyric-original { display: flex; flex-wrap: wrap; justify-content: inherit; gap: 0.25em; }
-        .lyric-word { display: inline-block; opacity: 0; filter: blur(15px); transform: translateY(40px) scale(0.8) rotateX(-30deg); transform-origin: bottom center; }
         
-        .lyric-translation {
-            font-size: clamp(1rem, 2vw, 1.5rem); color: var(--brand-alt); font-weight: 700; letter-spacing: 0px; 
-            margin-top: 15px; opacity: 0; filter: blur(10px); transform: translateY(20px); text-transform: none;
-            font-family: 'Inter', sans-serif; display: none; text-shadow: 0 5px 15px rgba(0,0,0,0.8);
-        }
-        #show-screen.learning-active .lyric-translation { display: block; }
+        .lyric-word { display: inline-block; transition: color 0.2s, transform 0.2s; cursor: pointer; }
+        #show-screen.learning-active .lyric-word:hover { color: var(--brand-alt); transform: translateY(-2px); }
 
-        .fallback-ring {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 100%; height: 100%; border: 2px solid rgba(255,255,255,0.1); border-radius: 50%;
-            z-index: 1; pointer-events: none; display: none;
-        }
+        /* MODO QUIZ (Palavras Ocultas) */
+        .lyric-word.quiz-blank { background: rgba(255,255,255,0.1); border: 1px dashed rgba(255,255,255,0.5); border-radius: 8px; color: transparent; padding: 0 15px; position: relative; overflow: hidden;}
+        .lyric-word.quiz-blank::after { content: '?'; position: absolute; top:50%; left:50%; transform: translate(-50%, -50%); color: var(--brand-alt); font-size: 0.5em; text-shadow: 0 0 10px var(--brand-alt);}
+        .lyric-word.quiz-solved { color: var(--success) !important; background: transparent; border: none; padding: 0;}
+        .lyric-word.quiz-solved::after { display: none;}
 
-        /* Sidebar & Controles */
-        .tiktok-sidebar { position: absolute; right: 20px; bottom: 15%; display: flex; flex-direction: column; gap: 20px; z-index: 100; align-items: center; }
-        .action-btn { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; color: #fff; font-size: 1.2rem; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .action-btn:hover { transform: scale(1.1); background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.5);}
-        .action-btn.active-state { color: var(--brand-alt); border-color: var(--brand-alt); background: rgba(14, 165, 233, 0.15);}
-        .action-btn.share { background: #fff; color: #000; }
-        .action-btn.share:hover { background: #ddd; }
+        .lyric-translation { font-size: clamp(0.9rem, 2vw, 1.2rem); color: var(--brand-alt); font-weight: 600; letter-spacing: 0px; margin-top: 8px; opacity: 0; height: 0; overflow: hidden; text-transform: none; transition: opacity 0.4s, height 0.4s; font-family: 'Inter', sans-serif;}
+        #show-screen.learning-active .lyric-line.active .lyric-translation { opacity: 1; height: auto; padding-top: 5px;}
 
-        .lang-selector { position: absolute; top: 30px; right: 30px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 15px; border-radius: 20px; outline: none; backdrop-filter: blur(10px); font-weight: 700; z-index: 100; cursor: pointer; display: none;}
-        #show-screen.learning-active .lang-selector { display: block; animation: fadeIn 0.5s ease;}
+        /* DICTIONARY MODAL */
+        .dict-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -40%) scale(0.9); width: 85%; max-width: 350px; background: rgba(15,15,15,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 25px; z-index: 2000; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 20px 50px rgba(0,0,0,0.8);}
+        .dict-modal.active { opacity: 1; pointer-events: all; transform: translate(-50%, -50%) scale(1);}
+        .dict-word { font-family: 'Syncopate'; font-size: 1.5rem; font-weight: 700; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px;}
+        .dict-trans { font-size: 1.2rem; color: var(--brand-alt); font-weight: 600; margin-bottom: 10px;}
+        .dict-ctx { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;}
+        .dict-close { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #888; font-size: 1.2rem; cursor: pointer;}
 
-        .progress-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background: rgba(255,255,255,0.1); z-index: 100; }
-        .progress-fill { height: 100%; width: 0%; background: var(--brand); box-shadow: 0 0 15px var(--brand); transition: width 0.1s linear;}
+        /* SIDEBAR & CONTROLS */
+        .tiktok-sidebar { position: absolute; right: 20px; bottom: 15%; display: flex; flex-direction: column; gap: 15px; z-index: 100; align-items: center; }
+        .action-btn { width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; color: #fff; font-size: 1.1rem; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .action-btn:hover { background: rgba(255,255,255,0.15); }
+        .action-btn.active-state { color: var(--brand-alt); border-color: var(--brand-alt); background: rgba(14, 165, 233, 0.15); box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);}
         
-        .swipe-hint { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.4); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 3px; display: flex; flex-direction: column; align-items: center; gap: 5px; animation: float 2s infinite ease-in-out; z-index: 100; pointer-events: none;}
-        @keyframes float { 0%,100%{transform: translate(-50%, 0);} 50%{transform: translate(-50%, -8px);} }
-        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+        .progress-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.05); z-index: 100; }
+        .progress-fill { height: 100%; width: 0%; background: var(--brand); box-shadow: 0 0 10px var(--brand); transition: width 0.1s linear;}
+        
+        .lang-selector { position: absolute; top: 80px; right: 30px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 12px; outline: none; font-weight: 600; font-size: 0.8rem; z-index: 100; cursor: pointer; display: none;}
+        #show-screen.learning-active .lang-selector { display: block; }
 
-        /* --- 3. EXPORT CARD --- */
+        /* EXPORT CARD (Otimizado) */
         #card-screen { background: #020202; z-index: 200;}
         .card-wrapper { perspective: 1000px; }
-        .final-card {
-            width: 400px; height: 680px; background: #0a0a0a; border-radius: 24px; padding: 35px;
-            position: relative; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,1), 0 0 0 1px rgba(255,255,255,0.1);
-            display: flex; flex-direction: column; justify-content: flex-end; transform-style: preserve-3d;
-        }
-        .card-glare { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(125deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.05) 100%); z-index: 10; pointer-events: none;}
-        .card-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(50px) brightness(0.3); z-index: 0; }
-        .card-cover { position: absolute; top: 35px; left: 50%; transform: translateX(-50%); width: 80%; aspect-ratio: 1; background-size: cover; border-radius: 12px; box-shadow: 0 25px 50px rgba(0,0,0,0.9); z-index: 2;}
-        
-        .card-info { z-index: 2; margin-bottom: 25px; position: relative;}
-        .card-song { font-size: 2.2rem; font-weight: 900; letter-spacing: -1.5px; line-height: 1.1; color: #fff; text-shadow: 0 5px 15px rgba(0,0,0,0.5);}
-        .card-artist { font-size: 1.1rem; color: #aaa; margin-top: 5px; font-weight: 300;}
-        
-        .card-stats { display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 20px; z-index: 2; position: relative;}
+        .final-card { width: 340px; height: 580px; background: #0a0a0a; border-radius: 20px; padding: 25px; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: flex-end; transform-style: preserve-3d; }
+        .card-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(40px) brightness(0.3); z-index: 0; }
+        .card-cover { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); width: 75%; aspect-ratio: 1; background-size: cover; border-radius: 10px; box-shadow: 0 15px 30px rgba(0,0,0,0.8); z-index: 2;}
+        .card-info { z-index: 2; margin-bottom: 20px; position: relative;}
+        .card-song { font-size: 1.8rem; font-weight: 900; line-height: 1.1; color: #fff; }
+        .card-artist { font-size: 0.9rem; color: #aaa; margin-top: 5px; }
+        .card-stats { display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 15px; z-index: 2; position: relative;}
         .stat-box { display: flex; flex-direction: column; }
-        .stat-label { font-size: 0.65rem; color: #888; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;}
-        .stat-val { font-size: 1.3rem; font-weight: 900; color: #fff; letter-spacing: -0.5px;}
+        .stat-label { font-size: 0.6rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;}
+        .stat-val { font-size: 1.1rem; font-weight: 800; color: #fff;}
+        .btn-download { margin-top: 30px; padding: 15px 40px; border-radius: 12px; background: #fff; color: #000; font-weight: 800; font-size: 1rem; border: none; cursor: pointer; text-transform: uppercase;}
         
-        .card-barcode { position: absolute; top: 35px; right: 35px; height: 80px; width: 25px; background: repeating-linear-gradient(to bottom, #fff, #fff 2px, transparent 2px, transparent 5px, #fff 5px, #fff 6px, transparent 6px, transparent 10px); z-index: 2; opacity: 0.5;}
-        .card-brand { position: absolute; bottom: 35px; right: 35px; font-family: 'Syncopate'; font-size: 0.5rem; color: rgba(255,255,255,0.4); z-index: 2; letter-spacing: 3px; writing-mode: vertical-rl; transform: rotate(180deg);}
-
-        .btn-download { margin-top: 40px; padding: 20px 50px; border-radius: 12px; background: #fff; color: #000; font-weight: 900; font-size: 1.1rem; cursor: pointer; border: none; z-index: 100; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; box-shadow: 0 10px 30px rgba(255,255,255,0.2);}
-        .btn-download:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(255,255,255,0.4); }
-        .btn-close { position: absolute; top: 30px; right: 30px; color: #fff; font-size: 2rem; cursor: pointer; z-index: 200; background: none; border: none; opacity: 0.5; transition: 0.2s;}
-        .btn-close:hover { opacity: 1; transform: scale(1.1);}
-
-        .loader { font-family: 'Syncopate'; font-size: 1.2rem; letter-spacing: 4px; animation: pulse 1s infinite alternate; }
-        @keyframes pulse { to { opacity: 0.2; transform: scale(0.95);} }
+        .loader { font-family: 'Syncopate'; font-size: 1rem; letter-spacing: 3px; animation: pulse 1s infinite alternate; }
+        @keyframes pulse { to { opacity: 0.3; transform: scale(0.98);} }
     </style>
 </head>
 <body>
-
     <div class="overlay vignette-layer"></div>
     <div class="overlay noise-layer"></div>
 
-    <div class="ft-branding">Finaltime<span>.</span></div>
+    <div class="header-ui">
+        <div class="ft-branding">Finaltime<span>.</span></div>
+        <div class="user-stats" id="user-stats" style="display:none;">
+            <i class="fa-solid fa-bolt"></i> <span id="learned-count">0</span> Aura
+        </div>
+    </div>
+
     <audio id="audio-player" crossorigin="anonymous"></audio>
 
     <div id="search-screen" class="screen active">
         <h1 class="hero-title">AURALEARN</h1>
-        <p class="hero-sub">V6.0 Immersion Engine</p>
+        <p class="hero-sub">V7.0 Interactive Engine</p>
         <div class="search-container">
-            <input type="text" id="search-input" class="search-input" placeholder="What's your vibe today? (e.g. Arctic Monkeys)" autocomplete="off">
+            <input type="text" id="search-input" class="search-input" placeholder="Search track or artist..." autocomplete="off">
             <div id="results" class="results-box"></div>
         </div>
     </div>
 
-    <div id="loading-screen" class="screen">
-        <div class="loader">SYNCING AURA...</div>
-    </div>
+    <div id="loading-screen" class="screen"><div class="loader">SYNCING AURA...</div></div>
 
     <div id="show-screen" class="screen">
         <select id="target-lang" class="lang-selector" onchange="changeLanguage()">
             <option value="pt">Português</option>
-            <option value="fr">Français</option>
             <option value="en">English</option>
+            <option value="fr">Français</option>
         </select>
         
         <div class="cinematic-bg-container">
             <div id="cinematic-bg" class="cinematic-bg"></div>
+            <div id="cinematic-overlay" class="cinematic-bg-overlay"></div>
             <video id="cinematic-video" autoplay loop muted playsinline></video>
         </div>
 
         <div id="swipe-container">
-            <div class="swipe-hint"><i class="fa-solid fa-chevron-up"></i> Swipe</div>
-
             <div class="artwork-container" id="artwork-3d">
-                <div class="cover-shadow"></div>
                 <div id="glass-cover" class="glass-cover"></div>
-                <div id="fallback-ring" class="fallback-ring"></div>
             </div>
 
-            <div id="lyrics-container" class="lyrics-stage"></div>
+            <div class="lyrics-viewport">
+                <div id="lyrics-track" class="lyrics-track"></div>
+            </div>
         </div>
 
         <div class="tiktok-sidebar">
-            <div class="action-btn" onclick="returnToSearch()" title="Search Again">
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </div>
-            <div class="action-btn" id="learn-btn" onclick="toggleLearningMode()" title="Immersive Learning">
-                <i class="fa-solid fa-book-open"></i>
-            </div>
-            <div class="action-btn" id="like-btn" onclick="toggleLike()">
-                <i class="fa-solid fa-heart"></i>
-            </div>
-            <div class="action-btn share" onclick="openCard()" title="Export Aura">
-                <i class="fa-solid fa-share-nodes"></i>
-            </div>
+            <div class="action-btn" onclick="returnToSearch()"><i class="fa-solid fa-magnifying-glass"></i></div>
+            <div class="action-btn" id="learn-btn" onclick="toggleLearningMode()"><i class="fa-solid fa-book-open"></i></div>
+            <div class="action-btn" id="like-btn" onclick="toggleLike()"><i class="fa-solid fa-heart"></i></div>
+            <div class="action-btn" onclick="openCard()"><i class="fa-solid fa-share-nodes"></i></div>
         </div>
-
         <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
     </div>
 
     <div id="card-screen" class="screen">
-        <button class="btn-close" onclick="closeCard()"><i class="fa-solid fa-xmark"></i></button>
         <div class="card-wrapper">
             <div id="export-card" class="final-card">
-                <div class="card-glare"></div>
-                <div id="card-bg" class="card-bg"></div>
-                <div class="overlay noise-layer" style="opacity: 0.4; z-index: 1;"></div>
-                
-                <div class="card-barcode"></div>
+                <div class="card-bg" id="card-bg"></div>
+                <div class="overlay noise-layer" style="opacity: 0.3; z-index: 1;"></div>
                 <div id="card-img" class="card-cover"></div>
-                
                 <div class="card-info">
                     <div id="card-song" class="card-song">Track Name</div>
                     <div id="card-artist" class="card-artist">Artist</div>
                 </div>
-                
                 <div class="card-stats">
-                    <div class="stat-box"><span class="stat-label">Aura Lvl</span><span id="stat-vibe" class="stat-val">MAX</span></div>
-                    <div class="stat-box"><span class="stat-label">Immersion</span><span id="stat-lang" class="stat-val">PT</span></div>
+                    <div class="stat-box"><span class="stat-label">Aura Exp</span><span id="stat-vibe" class="stat-val">0</span></div>
+                    <div class="stat-box"><span class="stat-label">Lang</span><span id="stat-lang" class="stat-val">PT</span></div>
                 </div>
-                
-                <div class="card-brand">FINALTIME</div>
             </div>
         </div>
-        <button class="btn-download" onclick="downloadCard()">Export Ticket</button>
+        <div style="display:flex; gap: 10px;">
+            <button class="btn-download" onclick="closeCard()" style="background:#333; color:#fff;"><i class="fa-solid fa-xmark"></i></button>
+            <button class="btn-download" onclick="downloadCard()">Export Ticket</button>
+        </div>
+    </div>
+
+    <div id="dict-modal" class="dict-modal">
+        <button class="dict-close" onclick="closeDictionary()"><i class="fa-solid fa-xmark"></i></button>
+        <div class="dict-word" id="dict-word">...</div>
+        <div class="dict-trans" id="dict-trans">Carregando...</div>
+        <div class="dict-ctx">Aprender com contexto fixa a palavra 4x mais rápido na memória. Continue explorando.</div>
     </div>
 
     <script>
-        // CONFIGURAÇÕES DA API
-        const PEXELS_KEY = ''; // Insira sua chave Pexels aqui para vídeos dinâmicos
+        // CONFIG & CACHE
+        const PEXELS_KEY = ''; // Opcional
+        const transCache = new Map(); // Cache local para evitar block da API
+
+        // DETECÇÃO LITE MODE (Mobile/Performance)
+        const isMobile = window.innerWidth < 768;
+        if(isMobile) document.body.classList.add('lite-mode');
+
+        // GESTÃO DE PROGRESSO (LocalStorage)
+        let userStats = { wordsLearned: 0 };
+        function loadStats() {
+            const saved = localStorage.getItem('aura_stats');
+            if(saved) userStats = JSON.parse(saved);
+            updateStatsUI();
+        }
+        function saveStat() {
+            userStats.wordsLearned++;
+            localStorage.setItem('aura_stats', JSON.stringify(userStats));
+            updateStatsUI();
+        }
+        function updateStatsUI() {
+            document.getElementById('user-stats').style.display = 'flex';
+            document.getElementById('learned-count').innerText = userStats.wordsLearned;
+        }
+        loadStats();
 
         const UI = {
             screens: { search: document.getElementById('search-screen'), loading: document.getElementById('loading-screen'), show: document.getElementById('show-screen'), card: document.getElementById('card-screen') },
             input: document.getElementById('search-input'), results: document.getElementById('results'), audio: document.getElementById('audio-player'),
-            cineBg: document.getElementById('cinematic-bg'), cineVideo: document.getElementById('cinematic-video'),
+            cineBg: document.getElementById('cinematic-bg'), cineOverlay: document.getElementById('cinematic-overlay'), cineVideo: document.getElementById('cinematic-video'),
             artwork3D: document.getElementById('artwork-3d'), glassCover: document.getElementById('glass-cover'),
-            lyrics: document.getElementById('lyrics-container'), progress: document.getElementById('progress-fill'),
-            swipeCont: document.getElementById('swipe-container'), fallbackRing: document.getElementById('fallback-ring'),
-            targetLang: document.getElementById('target-lang')
+            lyricsTrack: document.getElementById('lyrics-track'), progress: document.getElementById('progress-fill'),
+            targetLang: document.getElementById('target-lang'), dictModal: document.getElementById('dict-modal')
         };
 
         let STATE = {
             playlist: [], currentIndex: 0, lyricsData: [], activeLine: -1,
-            audioCtx: null, analyser: null, dataArray: null, animFrame: null, bgAnim: null,
-            lastBeatTime: 0, startY: 0, learningMode: false
+            audioCtx: null, analyser: null, dataArray: null, animFrame: null,
+            lastBeatTime: 0, learningMode: false,
+            bgTargetX: 0, bgTargetY: 0, bgScale: 1.1
         };
 
-        /* --- MOTOR DE VIBE (Geração Semântica) --- */
-        function generateVibe(title, artist) {
-            const text = `${title} ${artist}`.toLowerCase();
-            if (text.match(/night|dark|shadow|black|moon|midnight/)) return "dark city neon cyberpunk";
-            if (text.match(/love|heart|kiss|sweet|romance/)) return "romantic sunset cinematic";
-            if (text.match(/rain|cry|sad|tears|sorrow/)) return "rainy window moody";
-            if (text.match(/fire|burn|hot|summer|sun/)) return "summer beach aesthetic";
-            if (text.match(/rock|metal|grunge|guitar/)) return "concert dark grunge aesthetic"; 
-            return "abstract cinematic dark lighting";
+        /* --- MOTOR VISUAL REATIVO (Substitui GSAP estático) --- */
+        function triggerBeatEffect() {
+            // Escolhe uma direção aleatória suave para pan
+            STATE.bgTargetX = (Math.random() - 0.5) * 20; 
+            STATE.bgTargetY = (Math.random() - 0.5) * 20;
+            STATE.bgScale = 1.15 + (Math.random() * 0.1); // Soco de zoom
+            
+            // Muda a cor do overlay (color-burn) sutilmente
+            const colors = ['rgba(225,29,72,0.4)', 'rgba(14,165,233,0.4)', 'rgba(16,185,129,0.3)', 'rgba(0,0,0,0.5)'];
+            UI.cineOverlay.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+            if(!STATE.learningMode && !isMobile) {
+                gsap.fromTo(UI.artwork3D, {scale: 1.05}, {scale: 1, duration: 0.4, ease:"power2.out"});
+            }
         }
 
-        async function fetchBackgroundMedia(vibe) {
-            if (!PEXELS_KEY) return null;
-            try {
-                const res = await fetch(`https://api.pexels.com/videos/search?query=${encodeURIComponent(vibe)}&per_page=3`, {
-                    headers: { Authorization: PEXELS_KEY }
-                });
-                const data = await res.json();
-                if (data.video_files && data.video_files.length > 0) {
-                    const hd = data.video_files.find(v => v.quality === 'hd') || data.video_files[0];
-                    return hd.link;
-                }
-            } catch (e) { console.error("Pexels fetch failed:", e); }
-            return null;
+        // Loop contínuo de interpolação visual (muito mais fluido que GSAP timeline)
+        function renderVisuals() {
+            if(!UI.screens.show.classList.contains('active')) return requestAnimationFrame(renderVisuals);
+            
+            // LERPA o fundo em direção ao alvo criado pelo beat
+            const currTrans = UI.cineBg.style.transform || `translate(0vw, 0vh) scale(1.1)`;
+            let currentScale = parseFloat(currTrans.match(/scale\(([^)]+)\)/)?.[1] || 1.1);
+            
+            // Decaimento natural do zoom
+            currentScale += (1.1 - currentScale) * 0.05; 
+            
+            UI.cineBg.style.transform = `translate(${STATE.bgTargetX}vw, ${STATE.bgTargetY}vh) scale(${currentScale})`;
+            
+            requestAnimationFrame(renderVisuals);
         }
+        requestAnimationFrame(renderVisuals);
 
-        /* --- MOTOR DE TRADUÇÃO (Google API Free Endpoint) --- */
-        async function translateLine(text, targetLang) {
+
+        /* --- TRANSLATION API (COM CACHE) --- */
+        async function translateText(text, targetLang) {
             if(!text || text.trim() === '') return '';
+            const cacheKey = `${text}_${targetLang}`;
+            if(transCache.has(cacheKey)) return transCache.get(cacheKey);
+
             try {
                 const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
                 const res = await fetch(url);
                 const data = await res.json();
-                return data[0][0][0]; // Extrai o texto principal
-            } catch(e) {
-                return "Translation unavailable";
+                const result = data[0][0][0];
+                transCache.set(cacheKey, result);
+                return result;
+            } catch(e) { return "Tradução indisponível"; }
+        }
+
+        /* --- DICIONÁRIO INTERATIVO --- */
+        async function handleWordClick(e, word, isQuiz = false) {
+            if(!STATE.learningMode) return;
+            
+            if(isQuiz) {
+                // Lógica de Reveal do Quiz
+                e.target.classList.remove('quiz-blank');
+                e.target.classList.add('quiz-solved');
+                e.target.innerText = word;
+                saveStat(); // Ganha ponto
+                return;
             }
+
+            // Lógica do Dicionário
+            UI.audio.pause();
+            document.getElementById('dict-word').innerText = word.replace(/[^\w\s\']/g, ""); // limpa pontuação
+            document.getElementById('dict-trans').innerText = "Traduzindo...";
+            UI.dictModal.classList.add('active');
+
+            const trans = await translateText(word, UI.targetLang.value);
+            document.getElementById('dict-trans').innerText = trans;
+        }
+
+        function closeDictionary() {
+            UI.dictModal.classList.remove('active');
+            UI.audio.play();
         }
 
         /* --- BUSCA E PLAYLIST --- */
@@ -334,7 +378,7 @@
                 const imgHQ = track.artworkUrl100.replace('100x100bb', '800x800bb');
                 const div = document.createElement('div');
                 div.className = 'result-item';
-                div.innerHTML = `<img src="${track.artworkUrl100}" class="result-img"><div style="display:flex; flex-direction:column;"><span class="result-title">${track.trackName}</span><span class="result-artist">${track.artistName}</span></div>`;
+                div.innerHTML = `<img src="${track.artworkUrl100}" class="result-img"><div style="display:flex; flex-direction:column; overflow:hidden;"><span class="result-title">${track.trackName}</span><span class="result-artist">${track.artistName}</span></div>`;
                 div.onclick = () => buildPlaylistQueue(track.artistName, track.trackName, track.previewUrl, imgHQ);
                 UI.results.appendChild(div);
             });
@@ -358,44 +402,43 @@
         function returnToSearch() {
             UI.audio.pause();
             cancelAnimationFrame(STATE.animFrame);
-            if(STATE.bgAnim) STATE.bgAnim.kill();
             UI.cineVideo.style.opacity = '0';
-            UI.input.value = '';
-            UI.results.innerHTML = '';
+            UI.input.value = ''; UI.results.innerHTML = '';
             switchScreen('search');
         }
 
-        const cleanForLyrics = (str) => str.split(' - ')[0].split(' (')[0].split(' feat')[0].split(' ft')[0].trim();
+        const cleanStr = (str) => str.split(' - ')[0].split(' (')[0].split(' feat')[0].split(' ft')[0].trim();
 
         async function loadTrack(index) {
             const track = STATE.playlist[index];
             if(!track) return;
 
-            const cleanTitle = cleanForLyrics(track.title);
-            const cleanArtist = cleanForLyrics(track.artist);
+            const cleanTitle = cleanStr(track.title);
+            const cleanArtist = cleanStr(track.artist);
             
-            // UI Resets
+            // UI
             UI.cineBg.style.backgroundImage = `url(${track.cover})`;
             UI.glassCover.style.backgroundImage = `url(${track.cover})`;
             document.getElementById('card-img').style.backgroundImage = `url(${track.cover})`;
             document.getElementById('card-bg').style.backgroundImage = `url(${track.cover})`;
             document.getElementById('card-song').innerText = cleanTitle;
             document.getElementById('card-artist').innerText = track.artist;
-            document.getElementById('like-btn').querySelector('i').style.color = '#fff';
-            UI.fallbackRing.style.display = 'none';
             UI.cineVideo.style.opacity = '0';
 
-            // Background Video Vibe
-            const vibe = generateVibe(cleanTitle, cleanArtist);
-            const videoUrl = await fetchBackgroundMedia(vibe);
-            if(videoUrl) {
-                UI.cineVideo.src = videoUrl;
-                UI.cineVideo.oncanplay = () => { UI.cineVideo.style.opacity = '1'; };
+            // Pexels (Se falhar, o fundo estático processado em renderVisuals() assume lindamente)
+            if(PEXELS_KEY && !isMobile) {
+                try {
+                    const res = await fetch(`https://api.pexels.com/videos/search?query=${encodeURIComponent('abstract dark ' + cleanTitle)}&per_page=1`, { headers: { Authorization: PEXELS_KEY }});
+                    const data = await res.json();
+                    if (data.video_files && data.video_files.length > 0) {
+                        UI.cineVideo.src = data.video_files[0].link;
+                        UI.cineVideo.oncanplay = () => { UI.cineVideo.style.opacity = '1'; };
+                    }
+                } catch(e){}
             }
 
-            // Letras
-            STATE.lyricsData = [];
-            STATE.activeLine = -1;
+            // Lyrics
+            STATE.lyricsData = []; STATE.activeLine = -1; UI.lyricsTrack.innerHTML = ''; UI.lyricsTrack.style.transform = `translateY(50vh)`;
             try {
                 const res = await fetch(`https://lrclib.net/api/search?track_name=${encodeURIComponent(cleanTitle)}&artist_name=${encodeURIComponent(cleanArtist)}`);
                 const data = await res.json();
@@ -405,24 +448,14 @@
 
             UI.audio.src = track.audio;
             UI.audio.load();
-            UI.audio.volume = 0;
             setupAudioContext();
-
-            // Ken Burns Fallback
-            if(STATE.bgAnim) STATE.bgAnim.kill();
-            gsap.set(UI.cineBg, {scale: 1, x: 0, y: 0});
-            STATE.bgAnim = gsap.to(UI.cineBg, {
-                x: () => Math.random() * 20 - 10 + 'vw', y: () => Math.random() * 20 - 10 + 'vh', 
-                scale: 1.15, duration: 15, ease: "sine.inOut", yoyo: true, repeat: -1
-            });
 
             setTimeout(() => {
                 switchScreen('show');
                 UI.audio.play().then(() => {
-                    gsap.to(UI.audio, {volume: 1, duration: 1});
                     startEngine(cleanTitle);
-                }).catch(e => { alert("Interaja com a tela para tocar o áudio."); });
-            }, 800);
+                }).catch(e => { alert("Toque na tela para iniciar."); });
+            }, 500);
         }
 
         function parseLRC(lrc) {
@@ -432,44 +465,13 @@
                 const match = timeReg.exec(line);
                 if(match) {
                     const text = line.replace(timeReg, '').trim();
-                    if(text) parsed.push({ time: (parseInt(match[1]) * 60) + parseFloat(match[2]), text, translation: null });
+                    if(text) parsed.push({ time: (parseInt(match[1]) * 60) + parseFloat(match[2]), text, translation: null, domRef: null });
                 }
             });
             return parsed;
         }
 
-        /* --- SWIPE E 3D --- */
-        window.addEventListener('mousedown', e => STATE.startY = e.clientY);
-        window.addEventListener('touchstart', e => STATE.startY = e.touches[0].clientY);
-        window.addEventListener('mouseup', e => handleSwipe(e.clientY));
-        window.addEventListener('touchend', e => handleSwipe(e.changedTouches[0].clientY));
-
-        function handleSwipe(endY) {
-            if(!UI.screens.show.classList.contains('active')) return;
-            const diff = STATE.startY - endY;
-            if(diff > 60 && STATE.currentIndex < STATE.playlist.length - 1) changeTrackAnimation(1, -100); 
-            else if (diff < -60 && STATE.currentIndex > 0) changeTrackAnimation(-1, 100); 
-        }
-
-        function changeTrackAnimation(dir, yOffset) {
-            cancelAnimationFrame(STATE.animFrame);
-            gsap.to(UI.audio, {volume: 0, duration: 0.3});
-            gsap.to(UI.swipeCont, { y: `${yOffset}vh`, opacity: 0, duration: 0.4, ease: "power2.in", onComplete: () => {
-                STATE.currentIndex += dir;
-                gsap.set(UI.swipeCont, {y: `${-yOffset}vh`});
-                loadTrack(STATE.currentIndex);
-                gsap.to(UI.swipeCont, {y: '0vh', opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.2});
-            }});
-        }
-
-        document.addEventListener('mousemove', (e) => {
-            if(!UI.screens.show.classList.contains('active') || STATE.learningMode) return;
-            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
-            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-            UI.artwork3D.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-        });
-
-        /* --- ENGINE E RENDERIZAÇÃO --- */
+        /* --- ENGINE PRINCIPAL (AUDIO + LETRAS SCROLL) --- */
         function setupAudioContext() {
             if(!STATE.audioCtx) {
                 STATE.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -483,105 +485,104 @@
             if(STATE.audioCtx.state === 'suspended') STATE.audioCtx.resume();
         }
 
-        async function processTranslations(currentIndex) {
-            const lang = UI.targetLang.value;
-            // Traduz a linha atual se ainda não estiver traduzida
-            if(STATE.lyricsData[currentIndex] && !STATE.lyricsData[currentIndex].translation) {
-                STATE.lyricsData[currentIndex].translation = await translateLine(STATE.lyricsData[currentIndex].text, lang);
-                const transEl = document.getElementById(`trans-${currentIndex}`);
-                if(transEl) transEl.innerText = STATE.lyricsData[currentIndex].translation;
-            }
-            // Pré-busca a próxima linha
-            if(STATE.lyricsData[currentIndex+1] && !STATE.lyricsData[currentIndex+1].translation) {
-                STATE.lyricsData[currentIndex+1].translation = await translateLine(STATE.lyricsData[currentIndex+1].text, lang);
+        async function lazyLoadTranslation(idx) {
+            if(!STATE.learningMode || !STATE.lyricsData[idx]) return;
+            const item = STATE.lyricsData[idx];
+            if(!item.translation) {
+                item.translation = await translateText(item.text, UI.targetLang.value);
+                if(item.domRef) item.domRef.querySelector('.lyric-translation').innerText = item.translation;
             }
         }
 
         function changeLanguage() {
-            // Reseta traduções cacheadas ao trocar o idioma
             STATE.lyricsData.forEach(l => l.translation = null);
-            if(STATE.activeLine >= 0) processTranslations(STATE.activeLine);
+            if(STATE.activeLine >= 0) {
+                lazyLoadTranslation(STATE.activeLine);
+                lazyLoadTranslation(STATE.activeLine + 1);
+            }
         }
 
         function startEngine(fallbackTitle) {
-            UI.lyrics.innerHTML = '';
-            
             if(STATE.lyricsData.length > 0) {
                 STATE.lyricsData.forEach((line, i) => {
-                    const div = document.createElement('div');
-                    div.className = 'lyric-line'; div.id = `line-${i}`; div.style.display = 'none';
+                    const div = document.createElement('div'); div.className = 'lyric-line'; div.id = `line-${i}`;
                     
-                    const origDiv = document.createElement('div');
-                    origDiv.className = 'lyric-original';
-                    line.text.split(' ').forEach(w => {
-                        const span = document.createElement('span'); span.className = 'lyric-word'; span.innerText = w;
+                    const origDiv = document.createElement('div'); origDiv.className = 'lyric-original';
+                    const words = line.text.split(' ');
+                    
+                    // Lógica do Mini-Quiz (a cada ~5 linhas, esconde uma palavra longa)
+                    let quizIdx = -1;
+                    if(i % 5 === 0 && words.length > 3) {
+                        const longWords = words.map((w, idx) => ({w, idx})).filter(x => x.w.length > 4);
+                        if(longWords.length > 0) quizIdx = longWords[Math.floor(Math.random() * longWords.length)].idx;
+                    }
+
+                    words.forEach((w, idx) => {
+                        const span = document.createElement('span'); span.className = 'lyric-word'; 
+                        
+                        if(idx === quizIdx) {
+                            span.classList.add('quiz-blank');
+                            span.onclick = (e) => handleWordClick(e, w, true);
+                        } else {
+                            span.innerText = w;
+                            span.onclick = (e) => handleWordClick(e, w, false);
+                        }
                         origDiv.appendChild(span);
                     });
                     
-                    const transDiv = document.createElement('div');
-                    transDiv.className = 'lyric-translation'; transDiv.id = `trans-${i}`;
-                    transDiv.innerText = "...";
+                    const transDiv = document.createElement('div'); transDiv.className = 'lyric-translation'; transDiv.innerText = "...";
 
-                    div.appendChild(origDiv);
-                    div.appendChild(transDiv);
-                    UI.lyrics.appendChild(div);
+                    div.appendChild(origDiv); div.appendChild(transDiv);
+                    UI.lyricsTrack.appendChild(div);
+                    line.domRef = div; // Armazena ref para scroll
                 });
             } else {
-                UI.lyrics.innerHTML = `<div class="lyric-line" id="fallback-txt" style="display:flex; opacity:1;"><span class="lyric-word" style="opacity:1; filter:blur(0); transform:none;">${fallbackTitle}</span></div>`;
-                UI.fallbackRing.style.display = 'block';
+                UI.lyricsTrack.innerHTML = `<div class="lyric-line active"><div class="lyric-original">${fallbackTitle}</div><div class="lyric-translation">Instrumental / No Lyrics</div></div>`;
             }
 
             function render() {
                 if(UI.audio.paused && UI.audio.currentTime === 0) return;
-
                 const currT = UI.audio.currentTime;
                 UI.progress.style.width = `${(currT / UI.audio.duration) * 100}%`;
 
+                // Beat Detection
                 STATE.analyser.getByteFrequencyData(STATE.dataArray);
                 const bass = STATE.dataArray.slice(0, 4).reduce((a, b) => a + b) / 4; 
-                
-                // Beat Animation
-                if(bass > 230 && (currT - STATE.lastBeatTime > 0.35)) {
-                    gsap.fromTo(UI.cineBg, {filter: 'blur(10px) brightness(0.8) saturate(1.5)'}, {filter: 'blur(35px) brightness(0.4) saturate(1.2)', duration: 0.5});
-                    if(!STATE.learningMode) gsap.fromTo(UI.artwork3D, {scale: 1.08}, {scale: 1, duration: 0.3, ease:"power2.out"});
-                    
-                    if(STATE.lyricsData.length === 0) {
-                        gsap.fromTo(UI.fallbackRing, {scale: 1, opacity: 1}, {scale: 1.5, opacity: 0, duration: 0.6});
-                        gsap.fromTo(document.getElementById('fallback-txt'), {scale: 1.1, color: 'var(--brand)'}, {scale: 1, color: '#fff', duration: 0.3});
-                    }
+                if(bass > 240 && (currT - STATE.lastBeatTime > 0.35)) {
+                    triggerBeatEffect();
                     STATE.lastBeatTime = currT;
                 }
 
-                // Lyric Flow
+                // Sincronização de Letras (Scroll Behavior)
                 if(STATE.lyricsData.length > 0) {
-                    let newIdx = STATE.lyricsData.findIndex(l => l.time > currT) - 1;
-                    if(newIdx === -2) newIdx = STATE.lyricsData.length - 1; 
-                    
-                    if(newIdx !== STATE.activeLine && newIdx >= 0) {
-                        // Translation Process (Lazy Load)
-                        if(STATE.learningMode) processTranslations(newIdx);
+                    // Busca a linha atual (última linha cujo tempo é menor que o tempo atual)
+                    let newIdx = -1;
+                    for(let i=0; i<STATE.lyricsData.length; i++){
+                        if(STATE.lyricsData[i].time <= currT + 0.3) newIdx = i; // +0.3 de folga pro visual
+                        else break;
+                    }
 
-                        if(STATE.activeLine >= 0) {
-                            const oldEl = document.getElementById(`line-${STATE.activeLine}`);
-                            if(oldEl) {
-                                gsap.to(oldEl.querySelectorAll('.lyric-word'), { y: -40, opacity: 0, filter: "blur(15px)", stagger: 0.02, duration: 0.4 });
-                                gsap.to(oldEl.querySelector('.lyric-translation'), { y: -20, opacity: 0, duration: 0.4, onComplete: () => oldEl.style.display = 'none' });
-                            }
+                    if(newIdx !== STATE.activeLine && newIdx >= 0) {
+                        // Remove ativo da anterior
+                        if(STATE.activeLine >= 0 && STATE.lyricsData[STATE.activeLine].domRef) {
+                            STATE.lyricsData[STATE.activeLine].domRef.classList.remove('active');
                         }
                         
-                        const newEl = document.getElementById(`line-${newIdx}`);
-                        if(newEl) {
-                            newEl.style.display = 'flex';
-                            gsap.fromTo(newEl.querySelectorAll('.lyric-word'), 
-                                { y: 40, opacity: 0, filter: "blur(15px)", scale: 0.8, rotationX: -45 }, 
-                                { y: 0, opacity: 1, filter: "blur(0px)", scale: 1, rotationX: 0, stagger: 0.04, duration: 0.7, ease: "back.out(1.4)" }
-                            );
-                            gsap.fromTo(newEl.querySelector('.lyric-translation'),
-                                { y: 20, opacity: 0, filter: "blur(10px)" },
-                                { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.8, delay: 0.3 }
-                            );
-                        }
+                        // Ativa nova
+                        const activeDom = STATE.lyricsData[newIdx].domRef;
+                        activeDom.classList.add('active');
+                        
+                        // Scrolla a Track
+                        // Calcula o deslocamento baseado no offsetTop da linha ativa
+                        const offset = activeDom.offsetTop;
+                        const viewportCenter = window.innerHeight * (STATE.learningMode ? 0.3 : 0.5); // Ajusta o centro dependendo do modo
+                        UI.lyricsTrack.style.transform = `translateY(${viewportCenter - offset}px)`;
+
                         STATE.activeLine = newIdx;
+
+                        // Carrega tradução da atual e da próxima
+                        lazyLoadTranslation(newIdx);
+                        lazyLoadTranslation(newIdx + 1);
                     }
                 }
                 STATE.animFrame = requestAnimationFrame(render);
@@ -601,11 +602,16 @@
             if(STATE.learningMode) {
                 UI.screens.show.classList.add('learning-active');
                 btn.classList.add('active-state');
-                UI.artwork3D.style.transform = `scale(0.8) translateZ(10px)`; // Reset tilt
-                if(STATE.activeLine >= 0) processTranslations(STATE.activeLine);
+                if(STATE.activeLine >= 0) lazyLoadTranslation(STATE.activeLine);
             } else {
                 UI.screens.show.classList.remove('learning-active');
                 btn.classList.remove('active-state');
+            }
+            // Força o ajuste do scroll ao trocar de modo
+            if(STATE.activeLine >= 0 && STATE.lyricsData[STATE.activeLine]) {
+                const activeDom = STATE.lyricsData[STATE.activeLine].domRef;
+                const viewportCenter = window.innerHeight * (STATE.learningMode ? 0.3 : 0.5);
+                UI.lyricsTrack.style.transform = `translateY(${viewportCenter - activeDom.offsetTop}px)`;
             }
         }
 
@@ -616,32 +622,23 @@
         }
 
         function openCard() {
-            gsap.to(UI.audio, {volume: 0.2, duration: 0.5});
             document.getElementById('stat-lang').innerText = UI.targetLang.value.toUpperCase();
+            document.getElementById('stat-vibe').innerText = userStats.wordsLearned;
             switchScreen('card');
-            gsap.fromTo('.final-card', {y: 100, rotationX: 20, opacity: 0}, {y: 0, rotationX: 0, opacity: 1, duration: 0.6, ease: "power3.out"});
         }
-
-        function closeCard() {
-            gsap.to(UI.audio, {volume: 1, duration: 0.5});
-            switchScreen('show');
-        }
+        function closeCard() { switchScreen('show'); }
 
         function downloadCard() {
             const card = document.getElementById('export-card');
             const btn = document.querySelector('.btn-download');
-            btn.innerText = "PROCESSING...";
-            
-            html2canvas(card, { useCORS: true, scale: 3, backgroundColor: '#020202' }).then(canvas => {
+            btn.innerText = "...";
+            html2canvas(card, { useCORS: true, scale: 2, backgroundColor: '#020202' }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'AuraLearn_Ticket.jpg';
-                link.href = canvas.toDataURL('image/jpeg', 0.95);
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
                 link.click();
-                btn.innerText = "EXPORT TICKET";
-            }).catch(err => {
-                alert("Habilite o CORS no navegador para exportar imagens externas.");
-                btn.innerText = "EXPORT TICKET";
-            });
+                btn.innerText = "Export Ticket";
+            }).catch(e => { btn.innerText = "Error (CORS)"; setTimeout(()=>btn.innerText="Export Ticket", 2000); });
         }
     </script>
 </body>
